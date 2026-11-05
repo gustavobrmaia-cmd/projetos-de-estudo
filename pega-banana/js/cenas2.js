@@ -380,46 +380,89 @@ function iniciarMapaMundo(de, depois) {
     },
     desenhar: function() {
       const t = this.t;
-      // mar e papel do mapa
-      ctx.fillStyle = "#1a5f86";
-      ctx.fillRect(0, 0, LARGURA, ALTURA);
-      for (let y = 0; y < ALTURA; y += 24) for (let x = (y / 24 % 2) * 24; x < LARGURA; x += 48) {
-        ctx.fillStyle = "rgba(255,255,255,0.06)";
-        ctx.fillRect(x + Math.round(Math.sin((t + y) * 0.03) * 4), y, 16, 3);
+      // mapa em pixel art (fixo) + animações por cima
+      ctx.drawImage(sprMapaMundo(), 0, 0);
+      const C = centrosMapa();
+      const px4 = function(v) { return Math.round(v / 4) * 4; };
+      // marolas brilhando no mar
+      for (let k = 0; k < 26; k++) {
+        const x = px4((k * 157 + t * (0.6 + (k % 3) * 0.3)) % LARGURA);
+        const y = px4(40 + (k * 97) % 620);
+        if (Math.floor((t + k * 13) / 20) % 3 === 0) { ctx.fillStyle = "rgba(231,245,255,0.55)"; ctx.fillRect(x, y, 12, 4); }
       }
-      ctx.fillStyle = "#0d0704"; ctx.fillRect(36, 96, 1128, 560);
-      ctx.fillStyle = "#e9d6a8"; ctx.fillRect(40, 100, 1120, 552);
-      ctx.fillStyle = "rgba(120,80,30,0.18)"; ctx.fillRect(40, 100, 1120, 10); ctx.fillRect(40, 642, 1120, 10);
-      // caminho pontilhado ligando os mundos
+      // lava do vulcão pulsando e fumaça subindo
+      const vx = C[5][0] * 4, vy = (C[5][1] - 9) * 4;
+      luzAditiva(vx, vy, 60, "255,120,30", 0.35 + Math.sin(t * 0.1) * 0.15);
+      for (let k = 0; k < 4; k++) {
+        const u = ((t * 0.6 + k * 30) % 120) / 120;
+        ctx.globalAlpha = 0.5 * (1 - u);
+        ctx.fillStyle = "#868e96";
+        ctx.fillRect(px4(vx - 8 + Math.sin(u * 6 + k) * 10), px4(vy - 10 - u * 90), 16, 12);
+      }
+      ctx.globalAlpha = 1;
+      // nuvens pixeladas passando (com sombra no chão)
+      for (let k = 0; k < 4; k++) {
+        const x = px4(((k * 340 + t * 0.5) % 1500) - 200), y = px4(120 + k * 130);
+        ctx.fillStyle = "rgba(0,0,0,0.12)";
+        ctx.fillRect(x + 20, y + 40, 96, 16); ctx.fillRect(x + 40, y + 32, 48, 8);
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.fillRect(x, y, 96, 16); ctx.fillRect(x + 20, y - 8, 48, 8); ctx.fillRect(x + 12, y + 16, 72, 4);
+      }
+      // caminho pontilhado (vermelho até onde o macaco já chegou)
+      const progresso = Math.min(1, Math.max(0, (t - 80) / 160));
       for (let i = 0; i < MUNDOS.length - 1; i++) {
-        for (let k = 0; k <= 1; k += 0.06) {
+        for (let k = 0; k <= 1.0001; k += 0.05) {
           const p = pontoCaminho(i, i + 1, k);
-          ctx.fillStyle = i < this.de || (i === this.de && k <= Math.min(1, Math.max(0, (t - 80) / 160))) ? "#c92a2a" : "#8a6a4a";
-          ctx.fillRect(Math.round(p[0]) - 3, Math.round(p[1]) - 3, 6, 6);
+          const feito = i < this.de || (i === this.de && k <= progresso);
+          const x = px4(p[0]) - 4, y = px4(p[1]) - 4;
+          ctx.fillStyle = "#2a1608"; ctx.fillRect(x - 4, y - 4, 16, 16);
+          ctx.fillStyle = feito ? "#e03131" : "#e9d6a8"; ctx.fillRect(x, y, 8, 8);
+          if (feito) { ctx.fillStyle = "#ff8787"; ctx.fillRect(x, y, 4, 4); }
         }
       }
-      for (let i = 0; i < MUNDOS.length; i++) desenharRegiaoMapa(i, POS_MAPA[i][0], POS_MAPA[i][1], !!save.chefes[i], i === this.para);
+      // marcadores e nomes das regiões
+      for (let i = 0; i < MUNDOS.length; i++) {
+        const x = px4(POS_MAPA[i][0]), y = px4(POS_MAPA[i][1]);
+        const atual = i === this.para;
+        // bandeirinha
+        ctx.fillStyle = "#2a1608"; ctx.fillRect(x - 2, y - 44, 8, 48);
+        ctx.fillStyle = "#e9d6a8"; ctx.fillRect(x, y - 42, 4, 44);
+        const onda = Math.floor((t + i * 7) / 10) % 2 ? 4 : 0;
+        ctx.fillStyle = "#2a1608"; ctx.fillRect(x + 2, y - 46, 32, 20 + onda);
+        ctx.fillStyle = MUNDOS[i].cor; ctx.fillRect(x + 4, y - 44, 28, 16 + onda);
+        ctx.fillStyle = clarear(MUNDOS[i].cor, 0.35); ctx.fillRect(x + 4, y - 44, 28, 4);
+        if (save.chefes[i]) ctx.drawImage(SPR_ESTRELA, x + 34, y - 58, 24, 24);
+        if (atual) {
+          const pulo = Math.floor(t / 8) % 2 ? 0 : 4;
+          ctx.fillStyle = "#2a1608"; ctx.fillRect(x - 10, y - 84 - pulo, 24, 12); ctx.fillRect(x - 6, y - 72 - pulo, 16, 8); ctx.fillRect(x - 2, y - 64 - pulo, 8, 6);
+          ctx.fillStyle = "#ffd43b"; ctx.fillRect(x - 6, y - 82 - pulo, 16, 8); ctx.fillRect(x - 2, y - 74 - pulo, 8, 8);
+        }
+        ctx.font = "bold 17px " + FONTE;
+        ctx.textAlign = "center";
+        textoSombra((i + 1) + ". " + MUNDOS[i].nome, x, y + 40, atual ? "#ffe066" : "#ffffff", 3);
+      }
       // a banana voa na frente...
       const kb = limitar((t - 20) / 120, 0, 1);
       const pb = pontoCaminho(this.de, this.para, kb);
       luzAditiva(pb[0], pb[1] - 40, 50, "255,215,70", 0.5);
       ctx.save();
-      ctx.translate(pb[0], pb[1] - 40 + Math.sin(t * 0.2) * 4);
-      ctx.rotate(t * 0.15);
+      ctx.translate(px4(pb[0]), px4(pb[1] - 40 + Math.sin(t * 0.2) * 4));
+      ctx.rotate(Math.round(t * 0.15 / (Math.PI / 4)) * (Math.PI / 4));
       ctx.drawImage(SPR_BANANA, -24, -20);
       ctx.restore();
       if (kb < 1 && t % 3 === 0) particula({ tipo: "vento", x: pb[0] - 120, y: pb[1] - 40 + (Math.random() - 0.5) * 30, vx: 10, vy: 0, g: 0, vida: 14, max: 14, tam: 40 });
       // ...e o macaco vai andando atrás dela
-      const km = limitar((t - 80) / 160, 0, 1);
-      const pm = pontoCaminho(this.de, this.para, km);
-      const spr = SPRITES_PRIMATA[km < 1 ? (Math.floor(t / 7) % 2 ? "andar1" : "andar2") : "vitoria"].d;
-      ctx.drawImage(spr, Math.round(pm[0] - 36), Math.round(pm[1] - 70), 72, 60);
+      const pm = pontoCaminho(this.de, this.para, progresso);
+      const spr = SPRITES_PRIMATA[progresso < 1 ? (Math.floor(t / 7) % 2 ? "andar1" : "andar2") : "vitoria"].d;
+      ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(px4(pm[0]) - 20, px4(pm[1]) - 12, 40, 8);
+      ctx.drawImage(spr, px4(pm[0] - 36), px4(pm[1] - 70), 72, 60);
       atualizarParticulas();
       desenharParticulas();
-      // título
-      ctx.font = "bold 40px " + FONTE;
+      // faixa com o título
+      painelPixel(LARGURA / 2 - 330, 18, 660, 64, "#d9b45a", "rgba(42,22,8,0.92)");
+      ctx.font = "bold 36px " + FONTE;
       ctx.textAlign = "center";
-      textoSombra(tr("Próximo mundo: {0}", MUNDOS[this.para].nome), LARGURA / 2, 66, ["#fff9c4", "#ffc21a"], 3);
+      textoSombra(tr("Próximo mundo: {0}", MUNDOS[this.para].nome), LARGURA / 2, 62, ["#fff9c4", "#ffc21a"], 3);
       dicaPularCena(t);
     },
     pular: function() { if (this.t > 20) acabarCena(); }

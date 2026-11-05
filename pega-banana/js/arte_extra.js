@@ -142,3 +142,148 @@ function desenharBananeira(x, base, t, vento) {
   const gx = BANANEIRA_GANCHO.x - s.width / 2, gy = BANANEIRA_GANCHO.y - s.height;
   return { x: x + gx * Math.cos(balanco) - gy * Math.sin(balanco), y: base + gx * Math.sin(balanco) + gy * Math.cos(balanco) };
 }
+
+
+// =========================
+// MAPA DO MUNDO EM PIXEL ART (tela entre um mundo e outro)
+// Desenhado numa grade de 300x175 e ampliado 4x. Cada região tem o seu bioma com detalhes;
+// o caminho, a banana, o macaco e as animações (lava, ondas, nuvens) vão por cima.
+// =========================
+
+const MAPA_ESC = 4;
+const MAPA_W = 300, MAPA_H = 175;
+
+function centrosMapa() { return POS_MAPA.map(function(p) { return [p[0] / MAPA_ESC, p[1] / MAPA_ESC]; }); }
+
+function construirMapaMundo() {
+  const b = pxNovo(MAPA_W, MAPA_H);
+  const C = centrosMapa();
+  const h = function(x, y, s) { return pxHash(x, y, s); };
+  // ---- mar: dois tons com pontilhado e marolas ----
+  for (let y = 0; y < MAPA_H; y++) for (let x = 0; x < MAPA_W; x++) {
+    const d = (PX_BAYER[y & 1][x & 1] + (y >> 3)) % 4;
+    let cor = y < 30 ? "#1b6a96" : y < 140 ? "#1a5f86" : "#165478";
+    if (d === 0 && h(x, y, 1) < 0.35) cor = "#1f72a0";
+    pxPonto(b, x, y, cor);
+  }
+  for (let k = 0; k < 90; k++) {
+    const x = Math.floor(h(k, 1, 2) * MAPA_W), y = Math.floor(h(k, 2, 2) * MAPA_H);
+    pxRet(b, x, y, 3, 1, "#3d8fbd"); pxPonto(b, x + 1, y - 1, "#5aa9d3");
+  }
+  // ---- terra: união de manchas em volta de cada região, com borda irregular ----
+  const regiao = new Array(MAPA_W * MAPA_H).fill(-1);
+  const forca = function(x, y) {
+    let melhor = -1, dist = 1e9;
+    for (let i = 0; i < C.length; i++) {
+      const dx = (x - C[i][0]) / 1.25, dy = y - C[i][1];
+      const d = Math.sqrt(dx * dx + dy * dy) - 26 - (h(Math.floor(x / 3), Math.floor(y / 3), 5) - 0.5) * 8;
+      if (d < dist) { dist = d; melhor = i; }
+    }
+    return [melhor, dist];
+  };
+  for (let y = 0; y < MAPA_H; y++) for (let x = 0; x < MAPA_W; x++) {
+    const f = forca(x, y);
+    // pontes de terra entre regiões vizinhas
+    let ponte = false;
+    for (let i = 0; i < C.length - 1; i++) {
+      const a = C[i], c = C[i + 1];
+      const vx = c[0] - a[0], vy = c[1] - a[1];
+      const t = limitar(((x - a[0]) * vx + (y - a[1]) * vy) / (vx * vx + vy * vy), 0, 1);
+      const px = a[0] + vx * t, py = a[1] + vy * t;
+      if (Math.hypot(x - px, y - py) < 9 + h(x >> 2, y >> 2, 6) * 3) ponte = true;
+    }
+    if (f[1] < 0 || ponte) regiao[y * MAPA_W + x] = f[0];
+  }
+  const BASE = [
+    ["#2b8a3e", "#2f9e44", "#237032"],      // selva
+    ["#e9c46a", "#f2d28b", "#d4a650"],      // deserto
+    ["#dbe9f6", "#f1f8ff", "#b9cfe4"],      // gelo
+    ["#3fb6c6", "#5cc8d4", "#2fa0b2"],      // oceano (água rasa / recife)
+    ["#8a6a52", "#a07e64", "#6f5442"],      // montanhas
+    ["#4a2a24", "#5c342c", "#3a201c"]       // vulcão
+  ];
+  for (let y = 0; y < MAPA_H; y++) for (let x = 0; x < MAPA_W; x++) {
+    const r = regiao[y * MAPA_W + x];
+    if (r < 0) continue;
+    const praia = [regiao[y * MAPA_W + x - 1], regiao[y * MAPA_W + x + 1], regiao[(y - 1) * MAPA_W + x], regiao[(y + 1) * MAPA_W + x]].some(function(v) { return v === -1 || v === undefined; });
+    let cor = BASE[r][h(x, y, 17) < 0.07 ? 2 : h(x >> 3, y >> 3, 7) < 0.5 ? 0 : 1];
+    if (praia) cor = r === 2 ? "#ffffff" : r === 5 ? "#2a1612" : r === 3 ? "#8fe3ea" : "#f3dfa8";
+    pxPonto(b, x, y, cor);
+  }
+  // contorno da costa e espuma
+  for (let y = 1; y < MAPA_H - 1; y++) for (let x = 1; x < MAPA_W - 1; x++) {
+    if (regiao[y * MAPA_W + x] >= 0) continue;
+    const viz = regiao[y * MAPA_W + x - 1] >= 0 || regiao[y * MAPA_W + x + 1] >= 0 || regiao[(y - 1) * MAPA_W + x] >= 0 || regiao[(y + 1) * MAPA_W + x] >= 0;
+    if (viz) pxPonto(b, x, y, h(x, y, 8) < 0.5 ? "#a5d8ff" : "#e7f5ff");
+  }
+  const dentro = function(x, y, i) { return regiao[Math.floor(y) * MAPA_W + Math.floor(x)] === i; };
+  // ---- detalhes de cada bioma ----
+  // Selva: árvores (copa redonda com luz) e um rio
+  for (let k = 0; k < 2000; k++) {
+    const x = (k % 60) * 5 + Math.floor(h(k, 11, 9) * 3), y = Math.floor(k / 60) * 5 + Math.floor(h(k, 12, 9) * 3);
+    if (h(k, 13, 9) < 0.35 || !dentro(x, y, 0) || !dentro(x + 3, y + 4, 0) || Math.hypot(x - C[0][0], (y - C[0][1]) * 1.4) < 9) continue;
+    pxRet(b, x, y + 1, 4, 2, "#1b5e20"); pxRet(b, x + 1, y, 2, 4, "#1b5e20");
+    pxRet(b, x + 1, y + 1, 2, 2, "#51cf66"); pxPonto(b, x + 1, y + 1, "#8ce99a");
+    pxPonto(b, x + 2, y + 4, "#6b4423");
+  }
+  for (let t = 0; t < 1; t += 0.01) {
+    const x = C[0][0] - 20 + t * 40, y = C[0][1] + 8 + Math.sin(t * 9) * 4;
+    if (dentro(x, y, 0)) { pxPonto(b, x, y, "#3d8fbd"); pxPonto(b, x, y + 1, "#5aa9d3"); }
+  }
+  // Deserto: dunas, pirâmides e cactos
+  for (let k = 0; k < 60; k++) {
+    const x = Math.floor(h(k, 21, 9) * MAPA_W), y = Math.floor(h(k, 22, 9) * MAPA_H);
+    if (!dentro(x, y, 1)) continue;
+    pxRet(b, x, y, 5, 1, "#c99a45"); pxRet(b, x + 1, y - 1, 3, 1, "#fbe7b0");
+  }
+  [[C[1][0] - 9, C[1][1] + 8, 14], [C[1][0] + 10, C[1][1] + 11, 9]].forEach(function(p) {
+    for (let i = 0; i < p[2]; i++) for (let k = -i; k <= i; k++) pxPonto(b, p[0] + k, p[1] - p[2] + i, k < 0 ? "#f2d28b" : "#c48d38");
+  });
+  [[C[1][0] - 20, C[1][1] - 6], [C[1][0] + 18, C[1][1] - 4], [C[1][0] + 2, C[1][1] + 16]].forEach(function(p) {
+    if (!dentro(p[0], p[1], 1)) return;
+    pxRet(b, p[0], p[1] - 4, 1, 5, "#2f9e44"); pxRet(b, p[0] - 2, p[1] - 3, 1, 2, "#2f9e44"); pxRet(b, p[0] + 2, p[1] - 2, 1, 2, "#2f9e44");
+  });
+  // Gelo: montanhas nevadas e pinheiros
+  [[C[2][0] - 8, C[2][1] + 8, 17], [C[2][0] + 12, C[2][1] + 11, 12]].forEach(function(p) {
+    for (let i = 0; i < p[2]; i++) for (let k = -i; k <= i; k++) pxPonto(b, p[0] + k, p[1] - p[2] + i, i < 6 ? "#ffffff" : k < 0 ? "#a5c8e8" : "#6f94bd");
+  });
+  for (let k = 0; k < 2000; k++) {
+    const x = (k % 60) * 5 + Math.floor(h(k, 31, 9) * 3), y = Math.floor(k / 60) * 5 + Math.floor(h(k, 32, 9) * 3);
+    if (h(k, 33, 9) < 0.6 || !dentro(x, y, 2) || !dentro(x, y + 4, 2) || y < C[2][1] + 6) continue;
+    pxPonto(b, x, y, "#1f5a46"); pxRet(b, x - 1, y + 1, 3, 1, "#1f5a46"); pxRet(b, x - 1, y + 2, 3, 1, "#2b7a5e"); pxPonto(b, x, y + 3, "#6b4423");
+    pxPonto(b, x, y, "#ffffff");
+  }
+  // Oceano: recife de corais, barco naufragado
+  for (let k = 0; k < 70; k++) {
+    const x = Math.floor(h(k, 41, 9) * MAPA_W), y = Math.floor(h(k, 42, 9) * MAPA_H);
+    if (!dentro(x, y, 3)) continue;
+    pxPonto(b, x, y, ["#ff8787", "#f783ac", "#ffd43b", "#ff922b"][k % 4]); pxPonto(b, x + 1, y - 1, "#ffc9c9");
+  }
+  pxRet(b, C[3][0] - 9, C[3][1] + 6, 14, 3, "#5c3d2e"); pxRet(b, C[3][0] - 8, C[3][1] + 6, 12, 1, "#8a5a2b");
+  pxRet(b, C[3][0] - 3, C[3][1] - 2, 1, 8, "#5c3d2e"); pxRet(b, C[3][0] - 2, C[3][1] - 1, 4, 3, "#e9ecef");
+  // Montanhas: cordilheira com picos nevados
+  [[C[4][0] - 16, C[4][1] + 10, 14], [C[4][0], C[4][1] + 8, 19], [C[4][0] + 16, C[4][1] + 11, 13]].forEach(function(p) {
+    for (let i = 0; i < p[2]; i++) for (let k = -i; k <= i; k++) pxPonto(b, p[0] + k, p[1] - p[2] + i, i < 5 ? "#ffffff" : k < 0 ? "#b89a84" : "#6f5442");
+  });
+  // Vulcão: cone escuro, cratera e rios de lava
+  const vx = C[5][0], vy = C[5][1] + 10;
+  for (let i = 0; i < 18; i++) for (let k = -i - 2; k <= i + 2; k++) pxPonto(b, vx + k, vy - 18 + i, k < 0 ? "#5c342c" : "#3a201c");
+  pxRet(b, vx - 3, vy - 19, 7, 2, "#ff6b00"); pxRet(b, vx - 2, vy - 20, 5, 1, "#ffd43b");
+  for (let i = 0; i < 16; i++) { pxPonto(b, vx - 2 - Math.floor(i * 0.6), vy - 17 + i, "#ff922b"); pxPonto(b, vx + 2 + Math.floor(i * 0.4), vy - 17 + i, "#ff6b00"); }
+  // ---- moldura de pergaminho com rosa dos ventos ----
+  for (let x = 0; x < MAPA_W; x++) for (let y = 0; y < MAPA_H; y++) {
+    const borda = Math.min(x, y, MAPA_W - 1 - x, MAPA_H - 1 - y);
+    if (borda < 4) pxPonto(b, x, y, borda === 0 ? "#2a1608" : borda < 3 ? (h(x, y, 50) < 0.5 ? "#c9a96e" : "#b8955a") : "#5a3a1c");
+  }
+  const rx = 20, ry = 150;
+  pxRet(b, rx - 6, ry, 13, 1, "#f1e7d0"); pxRet(b, rx, ry - 6, 1, 13, "#f1e7d0");
+  pxPoligono(b, [[rx, ry - 8], [rx + 2, ry], [rx, ry + 8], [rx - 2, ry]], ["#5a3a1c", "#8a6a4a", "#e9d6a8", "#fff8e1"], { rim: false });
+  pxPonto(b, rx, ry - 10, "#c92a2a");
+  return pxCanvas(b, MAPA_ESC);
+}
+
+let SPR_MAPA_MUNDO = null;
+function sprMapaMundo() {
+  if (!SPR_MAPA_MUNDO) SPR_MAPA_MUNDO = construirMapaMundo();
+  return SPR_MAPA_MUNDO;
+}
