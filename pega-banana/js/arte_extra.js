@@ -287,3 +287,32 @@ function sprMapaMundo() {
   if (!SPR_MAPA_MUNDO) SPR_MAPA_MUNDO = construirMapaMundo();
   return SPR_MAPA_MUNDO;
 }
+
+
+// ---------- Estampas novas das roupas (banana, galáxia, corações, diagonal, oncinha, gola, degradê) ----------
+const letraRoupaOriginal = letraRoupa;
+letraRoupa = function(item, ch, rg, x, y, mapa, reg) {
+  const p = item.padrao;
+  const novos = { banana: 1, galaxia: 1, coracoes: 1, diagonal: 1, oncinha: 1, gola: 1, degrade: 1 };
+  if (!novos[p]) return letraRoupaOriginal(item, ch, rg, x, y, mapa, reg);
+  if (ch === "." || ch === "D" || ch === "W" || ch === "E" || ch === "M") return ".";
+  const est = item.estilo;
+  const bx = x - MARGEM_PRIMATA;
+  const tom = SOMBRA_PELO[ch] ? "B" : "A";
+  if (est === "camisa" || est === "regata") {
+    const manga = rg === "b" && y >= 13 && y <= 15 && est !== "regata";
+    const corpo = rg === "t" || rg === "i";
+    if (!corpo && !manga) return ".";
+  } else if (est === "calca" || est === "short") {
+    if (rg !== "i" && rg !== "p") return ".";
+  } else return letraRoupaOriginal(item, ch, rg, x, y, mapa, reg);
+  const h = pxHash(bx, y, 3);
+  if (p === "banana") return (bx * 5 + y * 3) % 7 === 0 ? "C" : ((bx * 5 + y * 3) % 7 === 1 && y % 2 ? "Y" : tom);
+  if (p === "galaxia") return h < 0.1 ? "C" : h > 0.94 ? "Y" : tom;
+  if (p === "coracoes") return (bx + y * 2) % 6 === 0 || ((bx + y * 2) % 6 === 1 && y % 2 === 0) ? "C" : tom;
+  if (p === "diagonal") return (bx + y) % 4 < 2 ? "C" : tom;
+  if (p === "oncinha") return h < 0.12 ? "C" : h < 0.22 ? "Y" : tom;
+  if (p === "gola") return y === 14 && rg === "t" ? "C" : (y === 15 && bx === 10 ? "C" : tom);
+  if (p === "degrade") return y <= 14 ? "C" : y === 15 ? "Y" : tom;
+  return tom;
+};
