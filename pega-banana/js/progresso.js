@@ -99,6 +99,7 @@ function mostrarCartaoFase() {
   }
   // (sem contar qual é o inimigo ou o obstáculo novo: o jogador descobre jogando)
   const linhas = [tr("Fase {0} de {1}", fase.etapa + 1, FASES_NORMAIS)];
+  if (fase.tema) linhas.unshift(tr("Desafio: {0}", nomeTemaFase(fase)));
   const premio = premioDaFase(fase.indice);
   if (premio && !temCosmetico(premio.id)) linhas.push(tr("Prêmio ao terminar: {0}", premio.nome));
   cartao = { t: 0, titulo: nomeFase(fase.indice), mundo: fase.mundo, linhas: linhas };

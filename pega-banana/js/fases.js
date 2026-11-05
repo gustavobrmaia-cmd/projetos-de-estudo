@@ -586,6 +586,179 @@ const CHUNKS = {
 
 const CHUNKS_GERAIS = ["plano", "buraco", "muro", "escada", "plataformas", "grupo", "atirador"];
 
+// ---------- Pedaços novos (usados nas fases com tema: 2, 4, 6, 8 e 10 de cada mundo) ----------
+// Os pulos foram medidos: o macaco sobe ~150 px e alcança ~200 px na horizontal correndo.
+
+// Fundo de buraco: lava no Vulcão, água gelada no Gelo (só visual: cair continua sendo cair)
+function fundoDoBuraco(f, x, w) {
+  if (f.id === "lava") f.lavas.push({ x: x, w: w });
+  else if (f.id === "gelo") f.aguas.push({ x: x, w: w });
+}
+
+Object.assign(CHUNKS, {
+  // Torre: sobe por blocos, plataforma alta cheia de moedas e desce do outro lado
+  torre: function(f, x, d, r) {
+    // degraus de 64 px (nunca um muro alto demais) e nenhum vão onde dê para ficar preso
+    const w = 820;
+    fChao(f, x, w, geloSorteado(f, r));
+    fBloco(f, x + 120, CHAO - 64, 100, 64);
+    fBloco(f, x + 220, CHAO - 128, 100, 128);
+    fBloco(f, x + 320, CHAO - 192, 180, 192);
+    fPlat(f, x + 350, CHAO - 300, 120, d > 0.45 && r() < 0.5 ? { ax: 24, periodo: 200, fase: r() * 6 } : null);
+    fArcoMoedas(f, x + 330, x + 500, CHAO - 330, 40, 4);
+    fBloco(f, x + 500, CHAO - 128, 100, 128);
+    fBloco(f, x + 600, CHAO - 64, 100, 64);
+    fMoeda(f, x + 154, CHAO - 114); fMoeda(f, x + 254, CHAO - 178);
+    fMoeda(f, x + 534, CHAO - 178); fMoeda(f, x + 634, CHAO - 114);
+    if (d > 0.25) fColocar(f, inimigoDe(f, r, "terrestre"), x + 400, CHAO - 192);
+    if (d > 0.5 && r() < 0.6) fColocar(f, inimigoDe(f, r, "voador"), x + 430);
+    return x + w;
+  },
+
+  // Escadinha de plataformas soltas sobre um buraco: sobe e desce
+  degraus: function(f, x, d, r) {
+    const larg = aliviar(f, 96, 128);
+    const passo = aliviar(f, 150, 140);
+    const alto = aliviar(f, 60, 45);
+    fChao(f, x, 200);
+    const alturas = [1, 2, 3, 2, 1];
+    let px = x + 200 + (passo - larg);
+    alturas.forEach(function(a, i) {
+      const y = CHAO - a * alto;
+      fPlat(f, px, y, larg);
+      fLinhaMoedas(f, px + larg / 2 - 36, y - 46, 2, 40);
+      px += passo;
+    });
+    const fim = px;     // mesmo vão do último degrau até o chão
+    fundoDoBuraco(f, x + 200, fim - x - 200);
+    if (d > 0.4 && r() < 0.6) fColocar(f, inimigoDe(f, r, "voador"), x + 200 + (fim - x - 200) / 2);
+    fChao(f, fim, 240);
+    return fim + 240;
+  },
+
+  // Plataformas que vão e voltam, uma atrás da outra, sobre um buraco comprido
+  pontesFlutuantes: function(f, x, d, r) {
+    const n = d > 0.5 ? 4 : 3;
+    const larg = aliviar(f, 110, 140);
+    fChao(f, x, 200);
+    let px = x + 200 + 70;
+    for (let i = 0; i < n; i++) {
+      const y = CHAO - 70 - (i % 2) * 40;
+      fPlat(f, px, y, larg, { ax: 36, periodo: Math.round(190 - d * 40), fase: i * 1.6 });
+      fLinhaMoedas(f, px + larg / 2 - 36, y - 46, 2, 40);
+      px += larg + 70;
+    }
+    const fim = px;
+    fundoDoBuraco(f, x + 200, fim - x - 200);
+    if (d > 0.6) fColocar(f, inimigoDe(f, r, "voador"), x + 200 + (fim - x - 200) / 2);
+    fChao(f, fim, 220);
+    return fim + 220;
+  },
+
+  // Zigue-zague: plataformas alternando alto e baixo sobre o vazio
+  zigueZague: function(f, x, d, r) {
+    const larg = aliviar(f, 110, 140);
+    fChao(f, x, 180);
+    const ys = [CHAO - 40, CHAO - 140, CHAO - 50, CHAO - 150, CHAO - 60];
+    let px = x + 180 + 50;
+    ys.forEach(function(y, i) {
+      fPlat(f, px, y, larg, d > 0.6 && i === 2 ? { ay: 26, periodo: 180, fase: r() * 6 } : null);
+      fMoeda(f, px + larg / 2 - 16, y - 50);
+      px += larg + 50;
+    });
+    const fim = px;
+    fundoDoBuraco(f, x + 180, fim - x - 180);
+    if (d > 0.3 && r() < 0.6) fColocar(f, inimigoDe(f, r, "voador"), x + 180 + (fim - x - 180) * 0.6);
+    fChao(f, fim, 220);
+    return fim + 220;
+  },
+
+  // Emboscada: um vale entre dois murinhos cheio de inimigos
+  arena: function(f, x, d, r) {
+    const w = 900;
+    fChao(f, x, w, geloSorteado(f, r));
+    fBloco(f, x + 120, CHAO - 64, 64, 64);
+    fBloco(f, x + w - 184, CHAO - 64, 64, 64);
+    const n = 2 + (d > 0.35 ? 1 : 0) + (d > 0.75 ? 1 : 0);
+    for (let i = 0; i < n; i++) fColocar(f, sorteio(f.pool, r), x + 260 + i * (420 / Math.max(1, n - 1)));
+    fArcoMoedas(f, x + 200, x + w - 200, CHAO - 120, 90, 7);
+    if (r() < 0.5) f.powerups.push({ x: x + w / 2 - 22, y: CHAO - 260, tipo: sortearPowerup(r), base: CHAO - 260 });
+    return x + w;
+  },
+
+  // Corredor de teto baixo: dá só para pulinhos (espinhos e inimigos lá dentro)
+  corredor: function(f, x, d, r) {
+    const w = 860;
+    fChao(f, x, w, f.id === "gelo");
+    fBloco(f, x + 180, CHAO - 176, w - 360, 40);
+    fBloco(f, x + 180, CHAO - 176 - 300, 40, 300);        // parede segurando o teto (não dá pra passar por cima)
+    f.espinhos.push({ x: x + 330, y: CHAO - 24, w: 64, h: 24 });
+    if (d > 0.45) f.espinhos.push({ x: x + 560, y: CHAO - 24, w: 64, h: 24 });
+    fLinhaMoedas(f, x + 220, CHAO - 50, 3, 34);
+    fLinhaMoedas(f, x + 420, CHAO - 50, 3, 34);
+    if (d > 0.2) fColocar(f, inimigoDe(f, r, "terrestre"), x + 470);
+    return x + w;
+  },
+
+  // Rota alta: no chão, inimigos e espinhos; lá em cima, um caminho de plataformas com muitas moedas
+  rotaAlta: function(f, x, d, r) {
+    const w = 1160;
+    fChao(f, x, w);
+    fBloco(f, x + 100, CHAO - 90, 96, 90);
+    const plats = [[260, 170], [450, 230], [660, 200], [870, 160]];
+    plats.forEach(function(p) {
+      fPlat(f, x + p[0], CHAO - p[1], 140);
+      fLinhaMoedas(f, x + p[0] + 14, CHAO - p[1] - 46, 3, 40);
+    });
+    f.espinhos.push({ x: x + 420, y: CHAO - 24, w: 96, h: 24 });
+    fColocar(f, inimigoDe(f, r, "terrestre"), x + 300);
+    fColocar(f, inimigoDe(f, r, "terrestre"), x + 720);
+    if (d > 0.5) fColocar(f, inimigoDe(f, r, "atirador"), x + 980);
+    return x + w;
+  },
+
+  // Tesouro: pirâmide de moedas e um power-up garantido em cima de um pedestal
+  bau: function(f, x, d, r) {
+    const w = 640;
+    fChao(f, x, w, geloSorteado(f, r));
+    fBloco(f, x + 272, CHAO - 72, 96, 72);
+    f.powerups.push({ x: x + 298, y: CHAO - 170, tipo: sortearPowerup(r), base: CHAO - 170 });
+    for (let lin = 0; lin < 4; lin++) fLinhaMoedas(f, x + 84 + lin * 20, CHAO - 50 - lin * 36, 4 - lin, 40);
+    for (let lin = 0; lin < 4; lin++) fLinhaMoedas(f, x + 412 + lin * 20, CHAO - 50 - lin * 36, 4 - lin, 40);
+    if (d > 0.3) fColocar(f, inimigoDe(f, r, "voador"), x + 320);
+    return x + w;
+  }
+});
+
+// Temas das fases pares do mundo (2, 4, 6, 8 e 10): cada uma tem um jeito próprio, em vez de
+// repetir a fase anterior. As ímpares (1, 3, 5, 7, 9) apresentam o inimigo e o obstáculo novos.
+// clima: muda a hora do dia / o tempo da fase (ver ambienteFase em jogo.js)
+const TEMAS_FASE = [
+  { id: "subida",    nome: "A Subida",         clima: "tarde",
+    montar: function(n, o) { return ["torre", n, "degraus", "grupo", "escada", o(), "zigueZague", n, "torre"]; } },
+  { id: "emboscada", nome: "Emboscada",        clima: "noite",
+    montar: function(n, o) { return ["arena", n, "corredor", "grupo", o(), "atirador", "arena", n, "corredor"]; } },
+  { id: "abismo",    nome: "O Abismo",         clima: "neblina",
+    montar: function(n, o) { return ["pontesFlutuantes", n, "zigueZague", "grupo", "buraco", o(), "degraus", "pontesFlutuantes", n, "atirador"]; } },
+  { id: "tesouro",   nome: "Caça ao Tesouro",  clima: "pordosol",
+    montar: function(n, o) { return ["rotaAlta", n, "bau", o(), "rotaAlta", "zigueZague", n, "bau", "torre"]; } },
+  { id: "final",     nome: "Desafio Final",    clima: "tempestade",
+    montar: function(n, o, todos, r) {
+      const extras = ["arena", "pontesFlutuantes", "torre", "corredor", "degraus"];
+      const lista = [];
+      const obs = todos.slice().sort(function() { return r() - 0.5; });
+      for (let i = 0; i < obs.length; i++) { lista.push(obs[i]); lista.push(extras[i % extras.length]); }
+      lista.push(n);
+      lista.push("rotaAlta");
+      return lista;
+    } }
+];
+
+function temaDaFase(f) {
+  if (f.ehChefe || f.secreta || f.tutorial || f.etapa % 2 === 0) return null;
+  return TEMAS_FASE[Math.min(TEMAS_FASE.length - 1, Math.floor(f.etapa / 2))];
+}
+
 // Junta pedaços de chão encostados (menos coisas para desenhar e testar)
 function juntarChao(f) {
   const chaos = f.solidos.filter(function(s) { return s.tipo === "chao"; }).sort(function(a, b) { return a.x - b.x; });
@@ -627,6 +800,19 @@ function gerarFase(indice) {
     lista = ["plano", "buraco", "apresentaInimigo", "espinhos", "muro", "plataformas", "escada"];
   } else {
     if (f.mundo === M_DESERTO && f.etapa === 0) fPlaca(f, 440, tr("Seu prêmio: cipó-laço! {laco}: puxa o inimigo"));
+    const tema = temaDaFase(f);
+    if (tema) {
+      // fase com tema: um "roteiro" próprio com os pedaços novos (não repete a fase anterior)
+      f.tema = tema.id;
+      f.clima = tema.clima;
+      lista = tema.montar(novoObstaculo, function() { return sorteio(obstaculos, r); }, mundo.obstaculos.slice(0, nivel + 1), r);
+      // nunca o mesmo pedaço duas vezes seguidas
+      for (let i = 1; i < lista.length; i++) {
+        if (lista[i] === lista[i - 1]) lista[i] = sorteio(CHUNKS_GERAIS.filter(function(n) { return n !== lista[i - 1]; }), r);
+      }
+    }
+  }
+  if (!lista) {
     const total = 6 + Math.round(d * 7) + (f.etapa % 2);
     lista = [novoObstaculo, "apresentaInimigo"];
     let ultimo = "apresentaInimigo";
@@ -656,7 +842,9 @@ function gerarFase(indice) {
       ultimoCheckpoint = x + 120;
       x += 280;
     }
-    if (i === Math.floor(lista.length / 2) && x + 120 - ultimoCheckpoint > 1200) {
+    // fases compridas (Desafio Final) ganham dois checkpoints; as outras, um no meio
+    const pontos = lista.length >= 11 ? [Math.floor(lista.length / 3), Math.floor(lista.length * 2 / 3)] : [Math.floor(lista.length / 2)];
+    if (pontos.indexOf(i) >= 0 && x + 120 - ultimoCheckpoint > 1200) {
       fChao(f, x, 280);
       f.checkpoints.push({ x: x + 120, ativo: false, sobe: 0 });
       ultimoCheckpoint = x + 120;

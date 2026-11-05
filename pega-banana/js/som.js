@@ -109,6 +109,7 @@ const SONS = {
   cipoAchado: function() { [392, 523, 659, 784, 1047].forEach(function(f, i) { tom("triangle", f, f, 0.22, 0.06, i * 0.1); }); },
   ondaBolhas: function() { for (let k = 0; k < 8; k++) tom("sine", 300 + k * 90, 900 + k * 60, 0.12, 0.03, k * 0.05); },
   rugidoCurto:function() { ruido(0.4, 0.25, 600); tom("sawtooth", 160, 80, 0.4, 0.06); },
+  trovao:     function() { ruido(1.6, 0.22, 260); ruido(0.3, 0.12, 1200); },
   aviso:      function() { tom("square", 880, 880, 0.08, 0.04); tom("square", 660, 660, 0.08, 0.04, 0.1); }
 };
 

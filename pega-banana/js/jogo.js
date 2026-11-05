@@ -4131,6 +4131,7 @@ function desenharJogo() {
 
   desenharClima();
   ambienteMundo(fase.mundo, cam, tempo);
+  ambienteFase(fase, cam, tempo);
 
   if (flashNuke > 0) {
     ctx.fillStyle = "rgba(255,255,240," + (flashNuke / 40) * 0.8 + ")";
