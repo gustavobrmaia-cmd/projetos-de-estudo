@@ -264,24 +264,15 @@ function desenharIlustracao(cena, t) {
     ctx.globalAlpha = 1;
     if (t % 120 > 60) balaoSinal(600, CHAO - 140, "?", "#1c7ed6");
   } else if (cena === "ve") {
-    // bananeira gigante com a banana dourada lá no alto
-    ctx.fillStyle = "#6b4423";
-    ctx.fillRect(760, 160, 40, CHAO - 160);
-    ctx.fillStyle = "#8a5a2b";
-    ctx.fillRect(760, 160, 12, CHAO - 160);
-    for (let k = 0; k < 5; k++) {
-      ctx.fillStyle = k % 2 ? "#2f9e44" : "#40c057";
-      ctx.save();
-      ctx.translate(780, 170);
-      ctx.rotate(-1.4 + k * 0.7);
-      ctx.fillRect(0, -14, 200, 28);
-      ctx.restore();
-    }
-    banana(780, 210, Math.sin(t * 0.05) * 0.2, 120);
-    for (let k = 0; k < 3; k++) desenharEstrela4(780 + Math.cos(t * 0.05 + k * 2) * 60, 210 + Math.sin(t * 0.06 + k * 2) * 40, 6, "#ffffff");
+    // bananeira gigante com a banana dourada pendurada no cacho, lá no alto
+    const g = desenharBananeira(800, CHAO + 4, t);
+    const balanca = Math.sin(t * 0.05) * 0.2;
+    banana(g.x + 6 + Math.sin(balanca) * 20, g.y + 22, balanca, 120);
+    for (let k = 0; k < 3; k++) desenharEstrela4(g.x + Math.cos(t * 0.05 + k * 2) * 60, g.y + 22 + Math.sin(t * 0.06 + k * 2) * 40, 6, "#ffffff");
     desenharMacacoCena(520, CHAO, "olhar2", 1, 0);
     if (t > 30) balaoSinal(560, CHAO - 140, "!");
   } else if (cena === "pega") {
+    desenharBananeira(800, CHAO + 4, t);
     desenharMacacoCena(600, CHAO, t % 60 < 40 ? "vitoria" : "vitoria2", 1, 0);
     banana(600, CHAO - 116, 0, 90);
     if (t > 120) {
@@ -292,6 +283,7 @@ function desenharIlustracao(cena, t) {
     }
   } else if (cena === "vento") {
     const k = Math.min(1, t / 120);
+    desenharBananeira(800, CHAO + 4, t, Math.max(0, 1 - t / 200));
     desenharMacacoCena(600 - k * 40, CHAO, t < 20 ? "vitoria" : "queda", 1, 0);
     banana(600 + k * 700, CHAO - 116 - k * 380, t * 0.35, 70);
     ctx.fillStyle = "rgba(255,255,255,0.7)";

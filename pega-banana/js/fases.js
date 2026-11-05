@@ -644,6 +644,7 @@ function gerarFase(indice) {
 
   let x = 640;
   let checkpointCipo = false;
+  let ultimoCheckpoint = -99999;    // nunca dois checkpoints colados (acontecia na 1-5)
   let ultimoAr = 0;                 // Oceano: onde ficou a última fonte de bolhas de ar
   const noMar = f.id === "oceano";
   lista.forEach(function(nome, i) {
@@ -652,11 +653,13 @@ function gerarFase(indice) {
       checkpointCipo = true;
       fChao(f, x, 280);
       f.checkpoints.push({ x: x + 120, ativo: false, sobe: 0 });
+      ultimoCheckpoint = x + 120;
       x += 280;
     }
-    if (i === Math.floor(lista.length / 2)) {
+    if (i === Math.floor(lista.length / 2) && x + 120 - ultimoCheckpoint > 1200) {
       fChao(f, x, 280);
       f.checkpoints.push({ x: x + 120, ativo: false, sobe: 0 });
+      ultimoCheckpoint = x + 120;
       if (noMar) { f.ventosAr.push({ x: x + 200, t: 0 }); ultimoAr = x + 200; }
       x += 280;
     }

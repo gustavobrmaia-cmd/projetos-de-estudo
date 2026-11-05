@@ -99,6 +99,8 @@ function iniciarFase(indice, doCheckpoint) {
   flashDano = 0;
   tremor = 0;
   particulasHud = [];
+  // Poder ativo não passa para a próxima fase nem sobrevive à morte (voltar do checkpoint)
+  Object.keys(buffs).forEach(function(k) { buffs[k] = 0; });
 
   if (doCheckpoint && checkpointX !== null) {
     fase.checkpoints.forEach(function(c) { if (c.x <= checkpointX) c.ativo = true; });
