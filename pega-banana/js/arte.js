@@ -205,6 +205,9 @@ const POSES = {
   coca1: { olhos: "felizes", bracoD: BD.coca },
   coca2: { olhos: "felizes", boca: "aberta", bracoD: BD.coca2 },
   bocejo: { olhos: "fechados", boca: "bocejo", bracoE: [], bracoD: [], atras: BRACOS.alto.concat(ESP(BRACOS.alto)) },
+  // ----- respirando a bolha de ar (Oceano): abre bem a boca e depois enche o peito -----
+  respira1: { olhos: "surpresos", boca: "grito", bracoE: BRACOS.abre, cauda: CAUDAS.baixa },
+  respira2: { olhos: "fechados", boca: "bocejo", tronco: TRONCO_R, bracoE: BRACOS.bomba, cauda: CAUDAS.alta },
   // ----- andar / correr -----
   andar1: { bracoE: BRACOS.tras, bracoD: ESP(BRACOS.bomba), pernas: PERNAS.esq_alta },
   andar2: { bracoE: BRACOS.bomba, bracoD: ESP(BRACOS.tras), pernas: PERNAS.dir_alta },

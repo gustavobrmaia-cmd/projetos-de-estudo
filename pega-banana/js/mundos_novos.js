@@ -2,8 +2,8 @@
 
 // =========================
 // MECÂNICAS DOS MUNDOS NOVOS
-// Oceano: física debaixo d'água, ar (10 s parado), fontes de bolhas (a bolha leva o macaco até a
-//         superfície, ele fica confuso e volta pro fundo), correnteza, concha gigante, minas,
+// Oceano: física debaixo d'água, ar (10 s parado), fontes de bolhas (a bolha só enche o ar: o
+//         macaco abre a boca e engole; depois 3 s de recarga), correnteza, concha gigante, minas,
 //         fumarolas e âncoras caindo.
 // Montanhas Rochosas: rochas caindo, ponte de corda, tirolesa, corrente de ar e pêndulo.
 // Deserto: cospe-areia.
@@ -36,6 +36,7 @@ function alvoVisivel() {
 function atualizarAr(j) {
   if (!noMar() || j.morto || j.saindo || j.cenaBanana || j.bolhaCena) return;
   if (mensagem && mensagem.congela) return;
+  atualizarRespiracao(j);
   const parado = Math.abs(j.vx) < 0.6 && j.noChao;
   let gasto = parado ? 1 : 0.5;
   if (fase.ehChefe) gasto *= 0.6;
@@ -61,8 +62,18 @@ function desenharArHud(j) {
   const x = 20, y = 132, w = 166;
   const alerta = k < 0.3;
   painelPixel(x - 10, y - 6, w + 50, 28, alerta && tempo % 20 < 10 ? "#ff8787" : "#74c0fc");
-  // ícone de bolha
+  // ícone de bolha (apagado e enchendo de baixo pra cima durante a recarga de respirar)
+  const rec = j.recargaAr > 0 ? j.recargaAr / RECARGA_AR : 0;
+  ctx.globalAlpha = rec > 0 ? 0.35 : 1;
   ctx.drawImage(SPR_BOLHA, x - 2, y - 3, 22, 22);
+  ctx.globalAlpha = 1;
+  if (rec > 0) {
+    const hh = Math.round(22 * (1 - rec));
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - 2, y - 3 + 22 - hh, 22, hh); ctx.clip();
+    ctx.drawImage(SPR_BOLHA, x - 2, y - 3, 22, 22);
+    ctx.restore();
+  }
   const bx = x + 26;
   ctx.fillStyle = "#0d0704";
   ctx.fillRect(bx - 2, y + 1, w - 26 + 4, 14);
@@ -102,11 +113,28 @@ function atualizarFontesAr() {
       fase.bolhasAr.splice(i, 1);
       continue;
     }
-    if (!j.morto && !j.saindo && !j.cenaBanana && !j.bolhaCena && Math.hypot(j.x + j.w / 2 - bx, j.y + j.h / 2 - b.y) < 46) {
+    // só respira se a recarga de 3 s acabou (senão a bolha passa direto por ele)
+    if (!j.morto && !j.saindo && !j.cenaBanana && !(j.recargaAr > 0) && Math.hypot(j.x + j.w / 2 - bx, j.y + j.h / 2 - b.y) < 46) {
       fase.bolhasAr.splice(i, 1);
-      pegarBolhaAr(j, b);
+      pegarBolhaAr(j, b, bx);
     }
   }
+  // bolhas sendo "engolidas": encolhem indo para a boca do macaco
+  if (fase.bolhasSugadas) {
+    for (let i = fase.bolhasSugadas.length - 1; i >= 0; i--) {
+      const s = fase.bolhasSugadas[i];
+      s.t++;
+      const boca = bocaDoMacaco(j);
+      s.x += (boca.x - s.x) * 0.3;
+      s.y += (boca.y - s.y) * 0.3;
+      if (s.t >= 12) fase.bolhasSugadas.splice(i, 1);
+    }
+  }
+}
+
+// Onde fica a boca do macaco (para a bolha entrar nela)
+function bocaDoMacaco(j) {
+  return { x: j.x + j.w / 2 + j.dir * 6, y: j.y + j.h - 34 };
 }
 
 function estourarBolha(x, y) {
@@ -117,23 +145,35 @@ function estourarBolha(x, y) {
   }
 }
 
-function pegarBolhaAr(j, b) {
+// Bolha de ar (como no Minecraft): só enche o ar, não carrega o macaco.
+// Ele abre a boca e "engole" a bolha; depois tem 3 s de recarga até poder respirar de novo
+// (assim não fica preso num ciclo de bolhas).
+const RECARGA_AR = 180;
+const TEMPO_RESPIRAR = 34;
+function pegarBolhaAr(j, b, bx) {
   j.ar = AR_MAX;
-  som("bolhaAr");
+  j.recargaAr = RECARGA_AR;
+  j.respirando = TEMPO_RESPIRAR;
+  som("respira");
   texto(j.x + j.w / 2, j.y - 16, tr("Ar!"), "#c5f6fa", 22);
-  if (b.arena || fase.ehChefe) {
-    // na luta do chefe: só respira (sem passeio até a superfície)
-    estourarBolha(j.x + j.w / 2, j.y + j.h / 2);
-    return;
+  if (!fase.bolhasSugadas) fase.bolhasSugadas = [];
+  fase.bolhasSugadas.push({ x: bx === undefined ? b.x : bx, y: b.y, t: 0 });
+  for (let k = 0; k < 8; k++) {
+    const a = (k / 8) * Math.PI * 2;
+    particula({ tipo: "q", x: (bx === undefined ? b.x : bx) + Math.cos(a) * 20, y: b.y + Math.sin(a) * 20, vx: -Math.cos(a) * 1.5, vy: -Math.sin(a) * 1.5, g: 0, vida: 14, max: 14, cor: "#e3fafc", tam: 4 });
   }
-  // a bolha engole o macaco e sobe até a superfície
-  cancelarLaco();
-  j.cipo = null;
-  if (j.deslizando) { j.deslizando = false; j.y -= 36; j.h = 72; }
-  fase.bolhasPegas = (fase.bolhasPegas || 0) + 1;
-  j.bolhaCena = { etapa: "sobe", t: 0, longa: fase.bolhasPegas === 1, x0: j.x };
-  j.vx = 0;
-  j.vy = 0;
+}
+
+// Recarga do ar e a animação de respirar (roda todo passo, no Oceano)
+function atualizarRespiracao(j) {
+  if (j.recargaAr > 0) j.recargaAr--;
+  if (j.respirando > 0) {
+    j.respirando--;
+    if (j.respirando % 6 === 0) {
+      const boca = bocaDoMacaco(j);
+      particula({ tipo: "q", x: boca.x + (Math.random() - 0.5) * 10, y: boca.y + 4, vx: (Math.random() - 0.5) * 0.6, vy: -0.6, g: -0.02, vida: 20, max: 20, cor: "#e3fafc", tam: 3 });
+    }
+  }
 }
 
 // A "cutscene" da bolha: sobe, estoura na superfície, o macaco olha em volta confuso e afunda de volta
@@ -181,13 +221,26 @@ function atualizarBolhaCena(j) {
 }
 
 function desenharBolhasAr() {
-  if (!fase.bolhasAr) return;
-  for (let i = 0; i < fase.bolhasAr.length; i++) {
-    const b = fase.bolhasAr[i];
-    const bx = b.x + Math.sin(b.t * 0.05) * 10;
-    luzAditiva(bx, b.y, 44, "180,240,255", 0.25);
-    const s = 52 + Math.sin(b.t * 0.15) * 3;
-    ctx.drawImage(SPR_BOLHA_AR, Math.round(bx - s / 2), Math.round(b.y - s / 2), Math.round(s), Math.round(s));
+  const j = jogador;
+  const recarga = j && j.recargaAr > 0;
+  if (fase.bolhasAr) {
+    for (let i = 0; i < fase.bolhasAr.length; i++) {
+      const b = fase.bolhasAr[i];
+      const bx = b.x + Math.sin(b.t * 0.05) * 10;
+      // durante a recarga as bolhas ficam mais apagadas (ainda não dá para respirar)
+      luzAditiva(bx, b.y, 44, "180,240,255", recarga ? 0.1 : 0.25);
+      const s = 52 + Math.sin(b.t * 0.15) * 3;
+      ctx.globalAlpha = recarga ? 0.55 : 1;
+      ctx.drawImage(SPR_BOLHA_AR, Math.round(bx - s / 2), Math.round(b.y - s / 2), Math.round(s), Math.round(s));
+      ctx.globalAlpha = 1;
+    }
+  }
+  if (fase.bolhasSugadas) {
+    for (let i = 0; i < fase.bolhasSugadas.length; i++) {
+      const s = fase.bolhasSugadas[i];
+      const tam = Math.max(6, 52 * (1 - s.t / 12));
+      ctx.drawImage(SPR_BOLHA_AR, Math.round(s.x - tam / 2), Math.round(s.y - tam / 2), Math.round(tam), Math.round(tam));
+    }
   }
 }
 
@@ -445,27 +498,39 @@ function desenharFumarolas(cam) {
 
 // ---------- Âncoras (Oceano) ----------
 
+// Antes as âncoras miravam na frente do macaco, mas caíam tão devagar (45 passos de aviso invisível +
+// queda lenta) que sempre cravavam atrás dele, e apareciam "do nada" no topo da tela.
+// Agora: a âncora desce à vista até o topo da tela e balança (aviso), a sombra cresce no chão onde
+// ela vai cair, e aí despenca rápido. Mira onde o macaco vai estar quando ela chegar.
+const ANCORA_AVISO = 50;      // passos pendurada lá em cima antes de soltar
+const ANCORA_TOPO = 74;       // altura (y) onde ela fica pendurada avisando (abaixo do HUD de cima)
 function atualizarAncoras() {
   const j = jogador;
   const cj = caixaJogador();
   if (!fase.ancoras) fase.ancoras = [];
+  const cena = j.morto || j.saindo || j.cenaBanana || (mensagem && mensagem.congela);
   for (let i = 0; i < fase.zonasAncora.length; i++) {
     const z = fase.zonasAncora[i];
     const cx = j.x + j.w / 2;
-    if (j.morto || cx < z.x - 100 || cx > z.x + z.w + 100) continue;
-    if (++z.t >= z.intervalo) {
+    if (cena || cx < z.x || cx > z.x + z.w) continue;
+    if (++z.t >= z.intervalo && fase.ancoras.length < 3) {
       z.t = 0;
-      const ax = limitar(cx - 60 + Math.random() * 340, z.x + 30, z.x + z.w - 30);
-      fase.ancoras.push({ x: ax, y: -70, vy: 0, estado: "aviso", t: 0 });
+      // onde o macaco vai estar quando ela chegar (aviso + ~30 passos de queda), com um pouco de sorte
+      const prevista = cx + j.vx * (ANCORA_AVISO + 30) * 0.7;
+      const ax = limitar(prevista + (Math.random() - 0.5) * 120, z.x + 30, z.x + z.w - 30);
+      fase.ancoras.push({ x: ax, y: -90, vy: 0, estado: "aviso", t: 0 });
+      som("corrente");
     }
   }
   for (let i = fase.ancoras.length - 1; i >= 0; i--) {
     const a = fase.ancoras[i];
     a.t++;
     if (a.estado === "aviso") {
-      if (a.t > 45) { a.estado = "cai"; a.t = 0; }
+      // desce devagar até ficar à vista e treme antes de soltar
+      a.y += (ANCORA_TOPO - a.y) * 0.12;
+      if (a.t > ANCORA_AVISO) { a.estado = "cai"; a.t = 0; a.vy = 4; }
     } else if (a.estado === "cai") {
-      a.vy = Math.min(a.vy + 0.5, 11);
+      a.vy = Math.min(a.vy + 0.9, 17);
       a.y += a.vy;
       if (!j.morto && encosta(cj, { x: a.x - 18, y: a.y + 10, w: 36, h: 48 })) machucar(a.x);
       if (a.y + 60 >= CHAO) {
@@ -474,14 +539,17 @@ function atualizarAncoras() {
         a.t = 0;
         tremor = Math.max(tremor, 6);
         som("pancada");
-        for (let k = 0; k < 10; k++) particula({ tipo: "q", x: a.x + (Math.random() - 0.5) * 50, y: CHAO - 4, vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 3, g: 0.1, vida: 26, max: 26, cor: "#d8c592", tam: 6 });
+        for (let k = 0; k < 12; k++) particula({ tipo: "q", x: a.x + (Math.random() - 0.5) * 50, y: CHAO - 4, vx: (Math.random() - 0.5) * 5, vy: -Math.random() * 3.5, g: 0.1, vida: 26, max: 26, cor: "#d8c592", tam: 6 });
+        for (let k = 0; k < 6; k++) particula({ tipo: "bolha", x: a.x + (Math.random() - 0.5) * 40, y: CHAO - 20, vx: (Math.random() - 0.5) * 1.5, vy: -1.5 - Math.random() * 1.5, g: -0.01, vida: 40, max: 40, tam: 6 + Math.random() * 8 });
       }
     } else if (a.estado === "cravada") {
-      if (a.t > 70) { a.estado = "sobe"; a.t = 0; }
+      if (a.t > 60) { a.estado = "sobe"; a.t = 0; }
     } else {
-      a.y -= 4;
-      if (a.y < -120) fase.ancoras.splice(i, 1);
+      a.y -= 5;
+      if (a.y < -130) { fase.ancoras.splice(i, 1); continue; }
     }
+    // longe da tela: some (não fica acumulando)
+    if (Math.abs(a.x - (cameraX + larguraVista() / 2)) > LARGURA * 1.5) fase.ancoras.splice(i, 1);
   }
 }
 
@@ -491,16 +559,16 @@ function desenharAncoras(cam) {
     const a = fase.ancoras[i];
     if (!visivel(a.x - 30, 60, cam)) continue;
     if (a.estado === "aviso" || a.estado === "cai") {
-      // sombra e faixa de aviso no chão (como os meteoros)
-      const pulso = tempo % 10 < 5 ? 1 : 0.6;
-      ctx.globalAlpha = pulso * (a.estado === "aviso" ? Math.min(1, a.t / 10) : 1);
-      ctx.fillStyle = "rgba(0,20,40,0.45)";
-      ctx.fillRect(Math.round(a.x - 22), CHAO - 6, 44, 6);
-      ctx.fillStyle = "#e03131";
-      ctx.fillRect(Math.round(a.x - 18), CHAO - 4, 36, 4);
-      ctx.globalAlpha = 1;
+      // sombra crescendo no chão onde ela vai cravar + faixa vermelha piscando
+      const k = a.estado === "aviso" ? Math.min(1, a.t / ANCORA_AVISO) : 1;
+      const w = Math.round(16 + k * 34);
+      ctx.fillStyle = "rgba(0,20,40," + (0.2 + k * 0.35).toFixed(2) + ")";
+      ctx.fillRect(Math.round(a.x - w / 2), CHAO - 6, w, 6);
+      if (tempo % 10 < 5 || a.estado === "cai") {
+        ctx.fillStyle = "#e03131";
+        ctx.fillRect(Math.round(a.x - w / 2 + 4), CHAO - 4, w - 8, 4);
+      }
     }
-    if (a.estado === "aviso") continue;
     // corrente subindo até lá em cima
     for (let y = Math.round(a.y) - 4; y > -10; y -= 8) {
       ctx.fillStyle = "#16191d";
@@ -508,7 +576,15 @@ function desenharAncoras(cam) {
       ctx.fillStyle = "#5f6873";
       ctx.fillRect(Math.round(a.x - 2), y - 5, 4, 5);
     }
-    ctx.drawImage(SPR_ANCORA, Math.round(a.x - 24), Math.round(a.y));
+    // tremendo pouco antes de soltar
+    const treme = a.estado === "aviso" && a.t > ANCORA_AVISO - 18 ? (tempo % 4 < 2 ? -2 : 2) : 0;
+    ctx.drawImage(SPR_ANCORA, Math.round(a.x - 24) + treme, Math.round(a.y));
+    if (a.estado === "aviso" && a.t > 10) {
+      // "!" em cima avisando
+      ctx.font = "bold 22px " + FONTE;
+      ctx.textAlign = "center";
+      textoSombra("!", Math.round(a.x) + 26, Math.round(a.y) + 30, "#ff6b6b", 2);
+    }
   }
 }
 

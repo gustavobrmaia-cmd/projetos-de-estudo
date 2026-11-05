@@ -1460,6 +1460,9 @@ function atualizarBanana() {
   b.t++;
   if (b.estado === "fugindo") {
     const frente = j.x + j.w / 2;
+    const mar = fase.id === "oceano";
+    // no Oceano a banana fica a fase toda à vista, boiando dentro de uma bolha
+    if (mar) b.viu = true;
     if (!b.viu && j.x > fase.fimX - 950) { b.viu = true; som("vento"); for (let k = 0; k < 5; k++) vento(); }   // só aparece no final, com o vento
     // a distância "respira": chega perto e se afasta
     let dist = 330 + Math.sin(b.t * 0.011) * 150 + Math.sin(b.t * 0.027 + 1.3) * 70;
@@ -1468,29 +1471,40 @@ function atualizarBanana() {
       dist += 280 * Math.min(1, b.rajada / 30);
     }
     dist = limitar(dist, 140, larguraVista() * 0.58);
-    // chegou pertinho: uma rajada de vento leva a banana para longe
+    // chegou pertinho: uma rajada de vento leva a banana para longe (no mar: uma onda de bolhas)
     if (b.viu && !b.rajada && !j.morto && Math.abs(b.x + 24 - frente) < 130 && Math.abs(b.y + 20 - (j.y + j.h / 2)) < 230) {
       b.rajada = 90;
-      som("vento");
-      for (let k = 0; k < 5; k++) vento();
+      if (mar) { som("ondaBolhas"); ondaDeBolhas(b.x - 120, b.y + 20, 22); }
+      else {
+        som("vento");
+        for (let k = 0; k < 5; k++) vento();
+      }
     }
+    if (mar && b.rajada > 60 && tempo % 2 === 0) ondaDeBolhas(b.x - 40, b.y + 20, 2);
     const alvoX = frente + dist - 24;
     b.x += (alvoX - b.x) * (alvoX > b.x ? 0.05 : 0.02);
     const alvoY = BANANA_ALTURA + Math.sin(b.t * 0.045) * 30 + Math.sin(b.t * 0.017) * 15;
     b.y += (alvoY - b.y) * 0.05;
-    b.rot = Math.sin(b.t * 0.06) * 0.35;
+    // na onda de bolhas ela sai rodopiando
+    b.giro = b.giro || 0;
+    if (mar && b.rajada > 0) b.giro += 0.25 * Math.min(1, b.rajada / 30);
+    else b.giro += (Math.round(b.giro / (Math.PI * 2)) * Math.PI * 2 - b.giro) * 0.1;
+    b.rot = b.giro + Math.sin(b.t * 0.06) * 0.35;
     if (b.viu) brilhoBanana(b);
-    // reta final: ela escapa de vez e o macaco corre atrás
+    // reta final: ela escapa de vez e o macaco corre atrás (no mar: a onda de bolhas leva os dois)
     if (!j.morto && j.x > fase.fimX - 200) {
       b.estado = "escapando";
       b.t = 0;
+      if (mar) { som("ondaBolhas"); ondaDeBolhas(j.x - 160, j.y + j.h / 2, 30); }
       iniciarSaida();
     }
   } else if (b.estado === "escapando" || b.estado === "solta") {
+    const mar = fase.id === "oceano";
     b.x += 5 + b.t * 0.3;
-    b.y -= b.estado === "solta" ? 6 - b.t * 0.06 : 2 - b.t * 0.02;
+    b.y -= b.estado === "solta" ? 6 - b.t * 0.06 : (mar ? 1.4 + Math.sin(b.t * 0.15) * 1.5 : 2 - b.t * 0.02);
     b.rot += 0.3;
-    if (tempo % 3 === 0) vento();
+    if (mar) { if (tempo % 2 === 0) ondaDeBolhas(b.x - 30, b.y + 20, 2); }
+    else if (tempo % 3 === 0) vento();
     brilhoBanana(b);
   } else if (b.estado === "chegando") {
     // chefe: a banana vem voando com o vento e ele pega no ar
@@ -1588,6 +1602,21 @@ function iniciarSaida() {
 
 function correrSaindo(j) {
   j.dir = 1;
+  // Oceano: a onda de bolhas leva o macaco junto com a banana, os dois rodopiando
+  if (fase.id === "oceano" && !fase.ehChefe && !fase.secreta) {
+    j.tSaida = (j.tSaida || 0) + 1;
+    j.vx = 4 + Math.min(8, j.tSaida * 0.15);
+    j.x += j.vx;
+    j.y += (Math.max(140, CHAO - 260) - j.y) * 0.03 + Math.sin(j.tSaida * 0.12) * 1.2;
+    j.noChao = false;
+    j.giro = (j.giro + 0.24) % (Math.PI * 2) || 0.01;
+    if (tempo % 2 === 0) ondaDeBolhas(j.x - 30, j.y + j.h / 2, 2);
+    if (!j.saiu && j.x > cameraX + larguraVista() + 60) {
+      j.saiu = true;
+      fimDaFase();
+    }
+    return;
+  }
   j.vx = 7.5;
   j.x += j.vx;
   // se estava no ar, cai até o chão
@@ -1692,6 +1721,15 @@ function atualizarBuffs() {
 function particula(o) {
   if (particulas.length > 500) particulas.shift();
   particulas.push(o);
+}
+
+// Onda de bolhas (Oceano): um jato de bolhas correndo para a direita que leva a banana (e o macaco)
+function ondaDeBolhas(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    particula({ tipo: "bolha", x: x + (Math.random() - 0.3) * 60, y: y + (Math.random() - 0.5) * 90,
+      vx: 6 + Math.random() * 6, vy: -0.6 - Math.random() * 1.2, g: -0.01, vida: 40 + Math.floor(Math.random() * 30), max: 70,
+      tam: 8 + Math.random() * 18 });
+  }
 }
 
 function poeira(x, y, n, lado) {
@@ -1814,6 +1852,11 @@ function desenharParticulas() {
     } else if (p.tipo === "fantasma") {
       ctx.globalAlpha = k * p.alfa;
       ctx.drawImage(p.img, p.x, p.y);
+    } else if (p.tipo === "bolha") {
+      // bolhinha de verdade (com brilho), bamboleando enquanto sobe
+      ctx.globalAlpha = Math.min(1, k * 2) * 0.9;
+      const t = Math.max(4, Math.round(p.tam));
+      ctx.drawImage(SPR_BOLHA, Math.round(p.x - t / 2 + Math.sin((p.max - p.vida) * 0.25 + p.tam) * 2), Math.round(p.y - t / 2), t, t);
     } else if (p.tipo === "vento") {
       ctx.globalAlpha = Math.min(1, k * 2) * 0.8;
       ctx.fillStyle = "#ffffff";
@@ -3162,7 +3205,13 @@ function desenharBanana(naMao) {
   ctx.drawImage(SPR_BANANA, -24, -20);
   ctx.restore();
   // no mar a banana vai embora dentro de uma bolha
-  if (b.estado === "voando" && fase.id === "oceano" && b.t > 20) {
+  if ((b.estado === "fugindo" || b.estado === "escapando") && fase.id === "oceano") {
+    const s = 84 + Math.sin(tempo * 0.12) * 4;
+    luzAditiva(cx, cy, 60, "180,240,255", 0.2);
+    ctx.globalAlpha = 0.85;
+    ctx.drawImage(SPR_BOLHA_AR, Math.round(cx - s / 2), Math.round(cy - s / 2), Math.round(s), Math.round(s));
+    ctx.globalAlpha = 1;
+  } else if (b.estado === "voando" && fase.id === "oceano" && b.t > 20) {
     ctx.globalAlpha = 0.8;
     ctx.drawImage(SPR_BOLHA_AR, cx - 40, cy - 40, 80, 80);
     ctx.globalAlpha = 1;
@@ -3438,6 +3487,7 @@ function poseJogador() {
   if (j.cipo) return a.bal > 0.022 ? "balancoT" : a.bal < 0.012 ? "balancoF" : "pendurado";
   if (j.tirolesa) return "pendurado";
   if (j.bolhaCena) return j.bolhaCena.etapa === "boia" ? "olhar" + (j.bolhaCena.t % 40 < 20 ? "1" : "2") : "queda";
+  if (j.respirando > 0 && !j.deslizando && j.dash === 0) return j.respirando > 22 ? "respira1" : "respira2";
   if (j.dash > 0) return "dash";
   if (j.deslizando) return "deslizar";
   if (j.chute > 0) return j.chute > 11 ? "chute" : "chute2";

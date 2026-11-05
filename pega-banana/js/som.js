@@ -102,7 +102,14 @@ const SONS = {
   cuspe:      function() { ruido(0.08, 0.15, 3000); tom("square", 400, 200, 0.06, 0.03); },
   urro:       function() { ruido(1.2, 0.35, 420); tom("sawtooth", 140, 60, 1.1, 0.1); tom("sawtooth", 90, 45, 1.1, 0.08, 0.1); },
   mordida:    function() { ruido(0.1, 0.3, 1800); tom("square", 300, 80, 0.12, 0.08); },
-  grasnado:   function() { tom("sawtooth", 900, 500, 0.35, 0.05); tom("sawtooth", 800, 420, 0.3, 0.04, 0.3); }
+  grasnado:   function() { tom("sawtooth", 900, 500, 0.35, 0.05); tom("sawtooth", 800, 420, 0.3, 0.04, 0.3); },
+  // novos
+  corrente:   function() { for (let k = 0; k < 5; k++) { tom("square", 1400 - k * 60, 1100, 0.03, 0.015, k * 0.06); ruido(0.03, 0.03, 5000, k * 0.06); } },
+  respira:    function() { ruido(0.35, 0.06, 900); tom("sine", 260, 520, 0.3, 0.04); },
+  cipoAchado: function() { [392, 523, 659, 784, 1047].forEach(function(f, i) { tom("triangle", f, f, 0.22, 0.06, i * 0.1); }); },
+  ondaBolhas: function() { for (let k = 0; k < 8; k++) tom("sine", 300 + k * 90, 900 + k * 60, 0.12, 0.03, k * 0.05); },
+  rugidoCurto:function() { ruido(0.4, 0.25, 600); tom("sawtooth", 160, 80, 0.4, 0.06); },
+  aviso:      function() { tom("square", 880, 880, 0.08, 0.04); tom("square", 660, 660, 0.08, 0.04, 0.1); }
 };
 
 // Som de inimigo: só quando está na tela e no máximo um a cada tanto (para não ficar chato)
