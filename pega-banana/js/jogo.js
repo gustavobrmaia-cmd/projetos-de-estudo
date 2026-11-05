@@ -265,6 +265,7 @@ function atualizarJogador() {
     return;
   }
   if (j.saindo) { correrSaindo(j); return; }
+  if (j.cenaCipo) { atualizarCenaCipo(j, apertouPulo || apertouLaco || apertouDash); return; }
   if (j.cenaBanana) { andarCena(j); return; }
   if (j.bolhaCena) { atualizarBolhaCena(j); return; }
   if (j.agarrado) { if (j.invencivel > 0) j.invencivel--; return; }   // nas garras do Condor
@@ -3490,6 +3491,7 @@ function poseJogador() {
   const a = animJog;
   animJogadorAtualizar();
   if (j.morto) return "morte";
+  if (j.cenaPose) return j.cenaPose;
   if (j.comemorar > 0) return j.noChao && Math.floor(tempo / 7) % 2 ? "vitoria2" : "vitoria";
   if (j.invencivel > 74) return "dano";
   if (j.cipo) return a.bal > 0.022 ? "balancoT" : a.bal < 0.012 ? "balancoF" : "pendurado";
@@ -4115,6 +4117,7 @@ function desenharJogo() {
   desenharAura();
   desenharPetJogo();
   desenharJogador();
+  desenharCenaCipoMundo();
   desenharProjeteis();
   desenharMundoFrente(cam);
   desenharBarras(cam);
@@ -4138,7 +4141,7 @@ function desenharJogo() {
   ctx.restore();
 
   // cena depois do chefe: faixas pretas de cinema e o susto do macaco
-  if (jogador.cenaBanana || (fase.ehChefe && jogador.saindo)) {
+  if (jogador.cenaBanana || jogador.cenaCipo || (fase.ehChefe && jogador.saindo)) {
     jogador.cinema = Math.min(1, (jogador.cinema || 0) + 0.04);
   } else if (jogador.cinema) jogador.cinema = Math.max(0, jogador.cinema - 0.06);
   if (jogador.surpreso > 0) {
@@ -4151,6 +4154,7 @@ function desenharJogo() {
     desenharExtrasHud();
   }
   desenharMensagem();
+  desenharCenaCipoPainel();
   desenharResultadoFase();
   desenharCron();
   if (!modoRetrato) desenharToque();

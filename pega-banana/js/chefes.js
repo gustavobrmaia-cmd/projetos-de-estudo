@@ -178,7 +178,8 @@ function atualizarChefe() {
             salvar();
             som("poder");
             texto(c.x + c.w / 2, CHAO - 160, tr("Você ganhou o cipó-laço!"), "#69db7c", 30);
-            mostrarMensagem(tr("Você ganhou o cipó-laço!"), tr("{0}: puxa o inimigo e chuta pro espaço. Atrás da banana!", nomeComando("laco")), 200, iniciarCenaBanana, false);
+            // cena: o macaco acha o cipó-laço, tenta laçar a banana e aprende a usar (cena_cipo.js)
+            mostrarMensagem(tr("Chefe derrotado!"), tr("+{0} moedas", premio), 100, iniciarCenaCipo, false);
           } else {
             mostrarMensagem(tr("Chefe derrotado!"), tr("+{0} moedas. Atrás da banana!", premio), 110, iniciarCenaBanana, false);
           }

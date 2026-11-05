@@ -137,6 +137,7 @@ window.addEventListener("beforeunload", salvar);
 canvas.addEventListener("mousedown", function() {
   iniciarAudio();
   if (estado === "cena" && cenaAtual) cenaAtual.pular("clique");
+  else if (estado === "jogo" && jogador && jogador.cenaCipo) jogador.cenaCipoClique = true;
   else if (estado === "intro" && intro.t > 30) terminarIntro();
   else if (estado === "final" && final.pronto) trocarCena(voltarAoMenu);
 });
