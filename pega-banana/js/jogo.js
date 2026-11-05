@@ -710,6 +710,13 @@ function atualizarLaco() {
         break;
       }
     }
+    // o laço também desmancha o montinho cospe-areia (Deserto)
+    if (l.estado === "indo") {
+      for (let i = 0; i < fase.cospeAreias.length; i++) {
+        const c = fase.cospeAreias[i];
+        if (!c.morto && encosta(caixa, caixaCospe(c))) { destruirCospe(c, "laco"); l.estado = "voltando"; break; }
+      }
+    }
     if (l.estado === "indo" && chefe && chefe.vivo && !chefe.intangivel && encosta(caixa, chefe.caixa)) {
       danoChefe(2, px);
       l.estado = "voltando";
@@ -1704,6 +1711,7 @@ function nuke(mini) {
     }
   }
   projeteis = projeteis.filter(function(p) { return p.doJogador; });
+  fase.cospeAreias.forEach(function(c) { if (!c.morto && Math.abs(c.x - cx) < alcance) destruirCospe(c, "nuke"); });
   if (chefe && chefe.vivo) danoChefe(mini ? 4 : 8, cx, true);
 }
 

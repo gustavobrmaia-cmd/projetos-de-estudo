@@ -880,19 +880,58 @@ function desenharPendulos(cam) {
 
 // ---------- Cospe-areia (Deserto) ----------
 
+// Antes: imortal, cuspia a cada 1,5 s e as bolas voavam rápido demais.
+// Agora: recarrega em ~3,3 s, avisa antes (incha e solta grãos), a bola é lenta e faz um arco alto,
+// e dá para destruir o montinho: pisando em cima, com o dash, com o laço de cipó ou com a nuke.
+const RECARGA_COSPE = 200;
+const AVISO_COSPE = 40;
+
+function caixaCospe(c) { return { x: c.x - 34, y: CHAO - 44, w: 68, h: 44 }; }
+
+function destruirCospe(c, como) {
+  if (c.morto) return;
+  c.morto = 1;
+  som("rochaQuebra");
+  tremor = Math.max(tremor, 5);
+  ganharXp(XP.inimigo, c.x, CHAO - 80);
+  ganharMoedas(2, c.x, CHAO - 60);
+  for (let k = 0; k < 22; k++) {
+    particula({ tipo: "q", x: c.x + (Math.random() - 0.5) * 60, y: CHAO - 10 - Math.random() * 30, vx: (Math.random() - 0.5) * 6, vy: -1 - Math.random() * 5,
+      g: 0.25, vida: 30 + Math.floor(Math.random() * 20), max: 50, cor: k % 3 ? "#e8bd6a" : "#b8862e", tam: 5 + (k % 3) * 2 });
+  }
+  if (como === "pisao") texto(c.x, CHAO - 90, tr("Esmagado!"), "#ffe066", 20);
+}
+
 function atualizarCospeAreias() {
   const j = jogador;
+  const cj = caixaJogador();
   for (let i = 0; i < fase.cospeAreias.length; i++) {
     const c = fase.cospeAreias[i];
+    if (c.morto) { c.morto++; continue; }
     const dx = j.x + j.w / 2 - c.x;
     if (c.abre > 0) c.abre--;
-    if (Math.abs(dx) > 620 || j.morto) continue;
-    if (++c.t >= 90) {        // recarga de 1,5 s
+    // pisão: caindo em cima do montinho
+    if (!j.morto && j.vy > 1 && j.y + j.h <= CHAO - 18 + j.vy + 2 && encosta(cj, caixaCospe(c))) {
+      destruirCospe(c, "pisao");
+      j.vy = noMar() ? -8 : -11;
+      j.pulouNormal = false;
+      j.esticar = 1;
+      som("pisao");
+      continue;
+    }
+    // dash atravessando
+    if (!j.morto && j.dash > 0 && encosta(cj, caixaCospe(c))) { destruirCospe(c, "dash"); continue; }
+    if (Math.abs(dx) > 620 || j.morto) { c.t = Math.min(c.t, RECARGA_COSPE - AVISO_COSPE - 1); continue; }
+    c.t++;
+    // aviso: incha e solta grãozinhos antes de cuspir
+    c.aviso = c.t > RECARGA_COSPE - AVISO_COSPE;
+    if (c.aviso && tempo % 5 === 0) particula({ tipo: "q", x: c.x + (Math.random() - 0.5) * 30, y: CHAO - 44, vx: 0, vy: -1.2, g: 0.08, vida: 16, max: 16, cor: "#f2d28b", tam: 4 });
+    if (c.t >= RECARGA_COSPE) {
       c.t = 0;
       c.abre = 18;
-      const voo = 52;
+      const voo = 80;     // bola mais lenta, num arco alto (dá tempo de ver e pular/desviar)
       projeteis.push({ tipo: "areia", x: c.x - 12, y: CHAO - 46, w: 24, h: 24,
-        vx: limitar(dx / voo, -7.5, 7.5), vy: -9.5, g: 0.36, vida: 240, quebraNoChao: true });
+        vx: limitar(dx / voo, -4.2, 4.2), vy: -7.5, g: 0.19, vida: 260, quebraNoChao: true });
       if (Math.abs(dx) < 700) som("cospe");
       for (let k = 0; k < 6; k++) particula({ tipo: "q", x: c.x, y: CHAO - 34, vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 3, g: 0.15, vida: 20, max: 20, cor: "#e8bd6a", tam: 5 });
     }
@@ -903,13 +942,21 @@ function desenharCospeAreias(cam) {
   for (let i = 0; i < fase.cospeAreias.length; i++) {
     const c = fase.cospeAreias[i];
     if (!visivel(c.x - 40, 80, cam)) continue;
-    // fica de olho fechado longe, abre os olhos perto e escancara a boca ao cuspir
+    if (c.morto) {
+      // montinho desmanchado: vira um morrinho baixo de areia
+      const k = Math.max(0.25, 1 - c.morto / 20);
+      ctx.drawImage(SPR_COSPE[0], Math.round(c.x - 40), Math.round(CHAO - 44 * k), 80, Math.round(44 * k));
+      continue;
+    }
+    // fica de olho fechado longe, abre os olhos perto, incha avisando e escancara a boca ao cuspir
     const perto = Math.abs(jogador.x - c.x) < 620;
-    const q = c.abre > 0 ? 2 : perto ? 1 : 0;
-    const inc = c.abre > 0 ? Math.sin((18 - c.abre) / 18 * Math.PI) * 4 : 0;
+    const q = c.abre > 0 || c.aviso ? 2 : perto ? 1 : 0;
+    let inc = c.abre > 0 ? Math.sin((18 - c.abre) / 18 * Math.PI) * 4 : 0;
+    let tx = 0;
+    if (c.aviso) { inc = 3 + Math.sin(tempo * 0.6) * 2; tx = tempo % 4 < 2 ? -1 : 1; }
     ctx.fillStyle = "rgba(0,0,0,0.22)";
     sombraNoChao(c.x - 38, CHAO - 1, 76, 4);
-    ctx.drawImage(SPR_COSPE[q], Math.round(c.x - 40), Math.round(CHAO - 44 - inc), 80, Math.round(44 + inc));
+    ctx.drawImage(SPR_COSPE[q], Math.round(c.x - 40) + tx, Math.round(CHAO - 44 - inc), 80, Math.round(44 + inc));
   }
 }
 

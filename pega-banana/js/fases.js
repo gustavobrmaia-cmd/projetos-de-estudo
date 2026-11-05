@@ -307,7 +307,7 @@ const CHUNKS = {
     return x + 700;
   },
 
-  // Montinho de areia que cospe bolas de areia no macaco (recarrega em 1,5 s)
+  // Montinho de areia que cospe bolas de areia no macaco (recarrega em ~3 s; dá para destruir pisando em cima)
   cospeAreia: function(f, x, d, r) {
     const w = 780;
     fChao(f, x, w);
