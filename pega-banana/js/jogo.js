@@ -3471,6 +3471,22 @@ function animJogadorAtualizar() {
 
   // Balanço no cipó (velocidade suavizada)
   a.bal = j.cipo ? a.bal + (Math.abs(j.cipoW) - a.bal) * 0.2 : 0;
+
+  // Derrapada: correndo e apertando para o outro lado (solta poeira dos pés)
+  const quer = (teclas.direita ? 1 : 0) - (teclas.esquerda ? 1 : 0);
+  if (solo && !j.deslizando && quer !== 0 && Math.sign(j.vx) === -quer && vel > 2.2) a.derrapaT = 12;
+  else if (a.derrapaT > 0) a.derrapaT -= dt;
+  if (!solo || j.deslizando) a.derrapaT = 0;
+  a.derrapa = a.derrapaT > 0;
+  if (a.derrapa && tempo % 3 === 0 && !(j.chao && j.chao.gelo)) poeiraPes(j.x + j.w / 2 + Math.sign(j.vx) * 14, j.y + j.h);
+  // Trombada: bateu numa parede correndo
+  if (a.trombou > 0) a.trombou -= dt;
+  if (j.batidaX && a.velAntes > 4 && solo && !j.dash) {
+    a.trombou = 12;
+    j.esticar = -0.5;
+    poeira(j.x + (j.batidaX > 0 ? j.w : 0), j.y + j.h * 0.4, 4, -j.batidaX);
+  }
+  a.velAntes = vel;
 }
 
 // Parado: respira, pisca e, depois de uns segundos, olha em volta, coça a cabeça e boceja
@@ -3510,7 +3526,11 @@ function poseJogador() {
     return "queda";
   }
   const vel = Math.abs(j.vx);
+  if (a.trombou > 0) return "trombada";
   if (a.pousou > 0 && vel < 2.5) return "aterrissa";
+  if (a.derrapa) return "derrapa";
+  // devagar: caminhada (4 quadros com o passo do meio); rápido: corrida
+  if (vel > 0.5 && vel < 2.6 && !j.comemorar) return ["andar1", "andarM", "andar2", "andarM"][Math.floor(a.fase) % 4];
   if (vel > 0.5) return CICLO_CORRIDA[Math.floor(a.fase) % 4];
   return poseParadoJogador(a.parado);
 }
@@ -3626,13 +3646,20 @@ function desenharJogador() {
     const k = limitar(Math.abs(j.vy) / 22, 0, 0.1);
     sy *= 1 + k;
     sx *= 1 - k * 0.7;
-    incl = 0;
+    incl = j.giro > 0 ? 0 : limitar(j.vx * 0.014, -0.11, 0.11);
+  } else if (pose === "derrapa") {
+    // derrapando: corpo jogado para trás
+    incl = -j.dir * 0.16;
+    sx *= 1.05; sy *= 0.96;
   } else if (pose.indexOf("corre") === 0) {
     // corrida: corpo quica a cada passo e se inclina para a frente
     // corrida: só um quiquezinho para cima a cada passo (sem inclinar nem entortar o corpo)
     const passagem = Math.floor(animJog.fase) % 2 === 1;
-    bob = passagem ? -2 : 0;
-    incl = 0;
+    bob = passagem ? -3 : 0;
+    // correndo bem rápido: inclina um pouquinho para a frente
+    incl = vel > 4.4 ? j.dir * 0.05 : 0;
+  } else if (pose.indexOf("andar") === 0) {
+    bob = Math.floor(animJog.fase) % 2 === 1 ? -1 : 0;
   } else if (pose === "parado" || pose === "respira" || pose === "piscar") {
     sy *= 1 + Math.sin(tempo * 0.08) * 0.02;
   }

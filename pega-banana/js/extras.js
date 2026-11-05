@@ -63,9 +63,29 @@ function desenharPetJogo() {
   if (!petPos || Math.abs(petPos.x - alvoX) > 500) petPos = { x: alvoX, y: alvoY };
   petPos.x += (alvoX - petPos.x) * 0.12;
   petPos.y += (alvoY - petPos.y) * 0.2;
-  const pulinho = j.noChao && Math.abs(j.vx) > 1 ? Math.abs(Math.sin(tempo * 0.3)) * 4 : 0;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(j.dir > 0 ? s.d : s.e, Math.round(petPos.x), Math.round(petPos.y - pulinho));
+  // animação do pet: voando bate as asas e flutua; no chão dá pulinhos quando anda e respira parado
+  let dy = 0, sx = 1, sy = 1;
+  if (item.voa) {
+    dy = -26 + Math.sin(tempo * 0.12) * 5;
+    sy = 1 + Math.sin(tempo * 0.6) * 0.07;
+    sx = 1 - Math.sin(tempo * 0.6) * 0.04;
+  } else if (Math.abs(petPos.x - alvoX) > 3 || (j.noChao && Math.abs(j.vx) > 1)) {
+    const f = Math.abs(Math.sin(tempo * 0.3));
+    dy = -f * 7;
+    sy = f > 0.85 ? 1.08 : f < 0.2 ? 0.9 : 1;
+    sx = 2 - sy;
+  } else {
+    sy = 1 + Math.sin(tempo * 0.08) * 0.04;
+    sx = 2 - sy;
+    if (Math.floor(tempo / 200) % 3 === 0 && tempo % 200 < 20) dy = -Math.sin((tempo % 200) / 20 * Math.PI) * 8;   // pulinho de alegria
+  }
+  const dirPet = Math.abs(petPos.x - alvoX) > 6 ? (alvoX > petPos.x ? 1 : -1) : j.dir;
+  ctx.save();
+  ctx.translate(Math.round(petPos.x + s.w / 2), Math.round(petPos.y + s.h + dy));
+  ctx.scale(sx, sy);
+  ctx.drawImage(dirPet > 0 ? s.d : s.e, -s.w / 2, -s.h);
+  ctx.restore();
 }
 
 function desenharPetLoja(g, item) {

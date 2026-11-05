@@ -211,6 +211,9 @@ const POSES = {
   // ----- andar / correr -----
   andar1: { bracoE: BRACOS.tras, bracoD: ESP(BRACOS.bomba), pernas: PERNAS.esq_alta },
   andar2: { bracoE: BRACOS.bomba, bracoD: ESP(BRACOS.tras), pernas: PERNAS.dir_alta },
+  andarM: { bracoE: BRACOS.baixo, pernas: PERNAS.queda, tronco: TRONCO_R },
+  derrapa: { olhos: "surpresos", boca: "oh", bracoE: BRACOS.cima, bracoD: ESP(BRACOS.abre), pernas: PERNAS.abrir, cauda: CAUDAS.alta },
+  trombada: { olhos: "dor", boca: "reta", bracoE: BRACOS.abre, pernas: PERNAS.agachar, cauda: CAUDAS.alta },
   corre1: { bracoE: BRACOS.tras, bracoD: ESP(BRACOS.bomba), pernas: PERNAS.abrir },
   corre2: { bracoE: BRACOS.bomba, bracoD: ESP(BRACOS.bomba), pernas: PERNAS.esq_alta, cauda: CAUDAS.baixa },
   corre3: { bracoE: BRACOS.bomba, bracoD: ESP(BRACOS.tras), pernas: PERNAS.abrir },
