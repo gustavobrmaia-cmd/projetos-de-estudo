@@ -119,4 +119,4 @@ function desenharResultadoFase() {
 
 // ---------- Menu: total de estrelas ----------
 
-el("menuEstrelaIc").appendChild(iconeTela("estrela", 2));
+// (o total de estrelas agora fica no Perfil)

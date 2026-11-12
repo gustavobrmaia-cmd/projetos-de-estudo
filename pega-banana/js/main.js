@@ -54,6 +54,15 @@ document.addEventListener("keydown", function(e) {
     return;
   }
 
+  if (nomeAberto) {
+    if (k === "enter" && !e.repeat) { e.preventDefault(); confirmarNome(); }
+    else if (k === "escape" && !e.repeat && save.nome) fecharNome();
+    return;   // o resto das teclas vai para o campo de texto
+  }
+  if (perfilAberto || conquistasAbertas) {
+    if ((k === "escape" || k === "enter") && !e.repeat) { if (conquistasAbertas) fecharConquistas(); else fecharPerfil(); }
+    return;
+  }
   if (k === " " || k.startsWith("arrow") || k === "tab") e.preventDefault();
   const acao = mapaTeclas[k];
 

@@ -16,32 +16,73 @@
 
     <!-- Menu inicial -->
     <div id="telaMenu" class="tela">
+      <div id="menuCantoNivel" class="cantoNivel">
+        <span class="rot">Nível</span><span id="menuNivel" class="valor">1</span>
+        <span class="barraXp"><span id="menuXp"></span></span>
+      </div>
+      <div class="cantoDir">
+        <button class="sec quadrado" data-acao="perfil" title="Perfil"><canvas class="icone" data-icone="perfil"></canvas></button>
+        <button class="sec quadrado" data-acao="controles" title="Opções"><canvas class="icone" data-icone="engrenagem"></canvas></button>
+      </div>
       <div class="cabecalho">
         <canvas class="bananaDeco"></canvas>
         <div class="titulos">
           <h1>Pega Banana</h1>
-          <p class="sub"><span>A grande caçada à banana</span></p>
         </div>
         <canvas class="bananaDeco espelho"></canvas>
       </div>
-      <div class="pilulas">
-        <span class="pilula moedas"><span class="ic-moeda"></span><span id="menuMoedas">0</span><span class="rot">moedas</span></span>
-        <span class="pilula estrelas"><span id="menuEstrelaIc"></span><span id="menuEstrelas">0</span></span>
-        <span class="pilula progresso"><span class="rot">Fase</span><span id="menuProgresso"></span></span>
-        <span class="pilula nivel">
-          <span class="rot">Nível</span><span id="menuNivel" class="valor">1</span>
-          <span class="barraXp"><span id="menuXp"></span></span>
-          <span id="menuXpTexto" class="xpTexto"></span>
-        </span>
-      </div>
       <div class="botoes">
         <button class="grande" data-acao="jogar">Jogar (Enter)</button>
-        <button class="sec" data-acao="mapa">Escolher fase</button>
-        <button class="sec" data-acao="loja">Loja</button>
-        <button class="sec" data-acao="controles">Opções</button>
+        <div class="linhaQuadrados">
+          <button class="sec quadrado grandeQ" data-acao="mapa"><canvas class="icone" data-icone="mapa"></canvas><span>Fases</span></button>
+          <button class="sec quadrado grandeQ" data-acao="loja"><canvas class="icone" data-icone="loja"></canvas><span>Loja</span></button>
+        </div>
       </div>
-      <div class="controles" id="menuControles"></div>
+      <button class="sec quadrado cantoMedalha" data-acao="conquistas" title="Conquistas"><canvas class="icone" data-icone="medalha"></canvas></button>
     </div>
+
+    <!-- Perfil do jogador -->
+    <div id="telaPerfil" class="tela">
+      <div class="painelCentral largo perfil">
+        <h2>Perfil</h2>
+        <div class="perfilTopo">
+          <div class="vitrine"><canvas id="perfilAvatar" width="192" height="160"></canvas></div>
+          <div class="perfilInfo">
+            <div class="perfilNome"><span id="perfilNome"></span><button class="sec pequeno" data-acao="editarNome">Trocar nome</button></div>
+            <div class="perfilLinha"><span class="rot">Nível</span><b id="perfilNivel"></b><span class="barraXp"><span id="perfilXp"></span></span><span id="perfilXpTexto" class="xpTexto"></span></div>
+            <div class="perfilLinha"><span class="estrelaIc">★</span><b id="perfilEstrelas"></b><span class="rot">estrelas</span></div>
+            <div class="perfilLinha"><span class="medalhaIc">🏅</span><b id="perfilConquistas"></b><span class="rot">conquistas</span></div>
+          </div>
+        </div>
+        <div class="perfilStats" id="perfilStats"></div>
+        <button data-acao="fecharPerfil">Voltar</button>
+      </div>
+    </div>
+
+    <!-- Conquistas -->
+    <div id="telaConquistas" class="tela">
+      <div class="painelCentral largo conquistas">
+        <h2>Conquistas</h2>
+        <p class="info" id="conquistasTotal"></p>
+        <div class="listaConquistas" id="listaConquistas"></div>
+        <button data-acao="fecharConquistas">Voltar</button>
+      </div>
+    </div>
+
+    <!-- Nome do jogador (pedido na primeira vez que joga) -->
+    <div id="telaNome" class="tela">
+      <div class="painelCentral">
+        <h2>Qual é o seu nome?</h2>
+        <input id="campoNome" type="text" maxlength="20" autocomplete="off" spellcheck="false">
+        <p class="info" id="avisoNome">De 3 a 20 letras.</p>
+        <div class="botoes">
+          <button class="grande" data-acao="confirmarNome">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso de conquista (desce, espera e sobe) -->
+    <div id="toastConquista"><canvas class="icone" data-icone="medalha"></canvas><div><div class="t1">Conquista desbloqueada!</div><div class="t2" id="toastNome"></div></div></div>
 
     <!-- Mapa de fases -->
     <div id="telaMapa" class="tela">
@@ -174,6 +215,7 @@
   <script src="js/controle.js"></script>
   <script src="js/toque.js"></script>
   <script src="js/tutorial.js"></script>
+  <script src="js/perfil.js"></script>
   <script src="js/main.js"></script>
 
 </body></html>

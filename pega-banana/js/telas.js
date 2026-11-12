@@ -129,12 +129,15 @@ function comando(teclasNomes, texto) {
 }
 
 function atualizarTelas() {
-  const sobreposta = lojaAberta || controlesAbertos;
+  const sobreposta = lojaAberta || controlesAbertos || perfilAberto || conquistasAbertas || nomeAberto;
   mostrar(el("telaMenu"), estado === "menu" && telaAtual === "menu" && !sobreposta);
   mostrar(el("telaMapa"), estado === "menu" && telaAtual === "mapa" && !sobreposta);
   mostrar(el("telaPausa"), estado === "jogo" && pausado && !sobreposta && !reviverAberto);
   mostrar(el("telaReviver"), estado === "jogo" && reviverAberto);
   mostrar(el("telaControles"), controlesAbertos);
+  mostrar(el("telaPerfil"), perfilAberto && !controlesAbertos);
+  mostrar(el("telaConquistas"), conquistasAbertas);
+  mostrar(el("telaNome"), nomeAberto);
   mostrar(el("botoesJogo"), estado === "jogo" && !pausado);
   if (typeof nomeComando === "function") {
     // nomes das teclas sempre de acordo com a aba Controles (no toque, sem tecla)
@@ -146,46 +149,15 @@ function atualizarTelas() {
     if (!lojaAberta) el("lojaDica").textContent = dicaLoja();
   }
   mostrar(el("loja"), lojaAberta);
-  el("menuMoedas").textContent = save.moedas;
-  el("menuProgresso").textContent = (save.zerou ? tr("Zerado! Jogar = nova run") : tr("Próxima: {0}", nomeFase(save.desbloqueado))) +
-    (save.cronometro && save.recordes.run ? tr(" · Recorde: {0}", formatarCron(save.recordes.run)) : "");
   el("menuNivel").textContent = save.nivel;
-  el("menuEstrelas").textContent = totalEstrelas() + "/" + TOTAL_FASES * 3;
   el("menuXp").style.width = Math.round((100 * save.xp) / xpParaSubir(save.nivel)) + "%";
-  el("menuXpTexto").textContent = save.xp + "/" + xpParaSubir(save.nivel) + " XP";
+  // o nível só aparece no canto depois que a pessoa já jogou uma vez
+  el("menuCantoNivel").style.visibility = save.viuIntro || save.stats.tempo > 0 ? "visible" : "hidden";
   const txtCron = save.cronometro ? tr("Cronômetro: ligado") : tr("Cronômetro: desligado");
   el("btnCronControles").textContent = txtCron;
   el("btnSomOpcoes").textContent = save.mudo ? tr("Som: desligado ({0})", teclaDe("som")) : tr("Som: ligado ({0})", teclaDe("som"));
   if (controlesAbertos) renderizarOpcoes();
   el("btnSom").textContent = save.mudo ? tr("Som: desligado ({0})", teclaDe("som")) : tr("Som: ligado ({0})", teclaDe("som"));
-  // o cipó-laço só aparece na legenda depois que o Gorila Rei o entrega
-  const txtLaco = tr("cipó-laço (puxa o inimigo e chuta pro espaço!)");
-  el("menuControles").innerHTML = toqueAtivo ? [
-    comando(["←", "→"], tr("arraste do lado esquerdo: andar e deslizar")),
-    comando([tr("PULO")], tr("pular (segure: mais alto)")),
-    temCipo() ? comando([tr("LAÇO")], txtLaco) : "",
-    comando(["DASH"], tr("dash (melhoria)")),
-    comando(["1-5"], tr("toque nos poderes para usar"))
-  ].join("") : controleAtivo ? [
-    comando(["←", "→"], tr("andar")),
-    comando(["A"], tr("pular (segure: mais alto)")),
-    comando(["↓"], tr("deslizar")),
-    temCipo() ? comando(["X", "Y"], txtLaco) : "",
-    comando(["B"], tr("dash (melhoria)")),
-    comando(["LT"], tr("trocar poder")),
-    comando(["RT"], tr("usar poder")),
-    comando(["Back"], tr("loja")),
-    comando(["Start"], tr("pausa"))
-  ].join("") : [
-    comando([teclaDe("esquerda"), teclaDe("direita")], tr("andar")),
-    comando([teclaDe("pulo")], tr("pular (segure: mais alto)")),
-    comando([teclaDe("baixo")], tr("deslizar")),
-    temCipo() ? comando([teclaDe("laco")], txtLaco) : "",
-    comando([teclaDe("dash")], tr("dash (melhoria)")),
-    comando([teclaDe("poder1") + "-" + teclaDe("poder9")], tr("poderes")),
-    comando([teclaDe("loja")], tr("loja")),
-    comando([teclaDe("pausa")], tr("pausa"))
-  ].join("");
   if (telaAtual === "mapa") renderizarMapa();
 }
 
@@ -685,6 +657,12 @@ document.querySelectorAll("[data-acao]").forEach(function(b) {
     else if (acao === "voltar") { telaAtual = "menu"; atualizarTelas(); }
     else if (acao === "loja") abrirLoja();
     else if (acao === "controles") abrirControles();
+    else if (acao === "perfil") abrirPerfil();
+    else if (acao === "fecharPerfil") fecharPerfil();
+    else if (acao === "editarNome") abrirNome(null);
+    else if (acao === "conquistas") abrirConquistas();
+    else if (acao === "fecharConquistas") fecharConquistas();
+    else if (acao === "confirmarNome") confirmarNome();
     else if (acao === "fecharControles") fecharControles();
     else if (acao === "padraoControles") { save.teclas = copiaTeclasPadrao(); reconstruirMapaTeclas(); salvar(); renderizarControles(); atualizarTelas(); }
     else if (acao === "continuar") pausar(false);

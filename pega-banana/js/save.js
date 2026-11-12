@@ -31,7 +31,9 @@ function saveNovo() {
     nivel: 1,
     xp: 0,
     teclas: copiaTeclasPadrao(),
-    stats: { inimigos: 0, chutes: 0, chefes: 0, mortes: 0, tempo: 0 },
+    stats: { inimigos: 0, chutes: 0, chefes: 0, mortes: 0, tempo: 0, distancia: 0, pulos: 0, poderes: 0, dashs: 0, moedasTotal: 0 },
+    nome: "",                     // nome do jogador (pedido na primeira vez que joga)
+    conquistas: [],               // ids das conquistas desbloqueadas
     viuIntro: false,
     viuTutorial: false,           // já fez a primeira visita (história -> 1-1 sem menu)
     zerou: false,
@@ -57,6 +59,8 @@ let save = saveNovo();
   if (!s || typeof s !== "object") return;
 
   if (typeof s.moedas === "number" && s.moedas >= 0) save.moedas = Math.floor(s.moedas);
+  if (typeof s.nome === "string") save.nome = s.nome.slice(0, 20);
+  if (Array.isArray(s.conquistas)) save.conquistas = s.conquistas.filter(function(c) { return typeof c === "string"; });
   if (Array.isArray(s.comprados)) {
     s.comprados.forEach(function(id) {
       if (typeof id === "string" && save.comprados.indexOf(id) < 0) save.comprados.push(id);
