@@ -361,7 +361,7 @@ const CHUNKS = {
   pista: function(f, x, d, r) {
     const vao = 320 + Math.round(d * 2) * 20;
     fChao(f, x, 700, true);
-    fArcoMoedas(f, x + 700, x + 700 + vao, CHAO - 110, 90, 5);
+    fArcoMoedas(f, x + 700, x + 700 + vao, CHAO - 100, 70, 5);
     fChao(f, x + 700 + vao, 260, true);
     return x + 700 + vao + 260;
   },
@@ -682,7 +682,7 @@ Object.assign(CHUNKS, {
     const n = 2 + (d > 0.35 ? 1 : 0) + (d > 0.75 ? 1 : 0);
     for (let i = 0; i < n; i++) fColocar(f, sorteio(f.pool, r), x + 260 + i * (420 / Math.max(1, n - 1)));
     fArcoMoedas(f, x + 200, x + w - 200, CHAO - 120, 90, 7);
-    if (r() < 0.5) f.powerups.push({ x: x + w / 2 - 22, y: CHAO - 260, tipo: sortearPowerup(r), base: CHAO - 260 });
+    if (r() < 0.5) f.powerups.push({ x: x + w / 2 - 22, y: CHAO - 190, tipo: sortearPowerup(r), base: CHAO - 190 });
     return x + w;
   },
 
@@ -876,7 +876,62 @@ function gerarFase(indice) {
   f.largura = x + 900;
 
   juntarChao(f);
+  garantirAlcance(f);
   return f;
+}
+
+// Toda moeda e todo poder precisam dar para pegar (com folga): o que estiver alto demais desce até
+// uma altura boa em cima do chão/plataforma mais perto; o que estiver no meio do vazio, longe de
+// cipó, tirolesa ou corrente de ar, sai da fase.
+function garantirAlcance(f) {
+  const H = 118, HX = 96;          // altura e alcance para o lado "com folga" (o pulo real vai mais longe)
+  const sup = [];
+  f.solidos.forEach(function(s) { sup.push({ x: s.x, w: s.w, y: s.y, h: H }); });
+  f.plataformas.forEach(function(p) {
+    if (p.cai && p.fragil) return;
+    sup.push({ x: p.x0 - (p.ax || 0), w: p.w + 2 * (p.ax || 0), y: p.y0 + Math.abs(p.ay || 0), h: p.cogumelo ? 290 : H });
+  });
+  f.geiseres.forEach(function(g) { sup.push({ x: g.x, w: g.w, y: CHAO, h: 360 }); });
+  const especial = function(cx, cy) {
+    if (f.tornados.some(function(t) { return cx > t.x - 20 && cx < t.x + t.w + 20 && cy > t.topo - 40; })) return true;
+    if (f.subidas.some(function(s) { return cx > s.x && cx < s.x + s.w && cy > s.topo; })) return true;
+    // no arco do cipó (onde o macaco passa balançando)
+    if (f.cipos.some(function(c) { const d = Math.hypot(cx - c.x, cy - c.y); return cy > c.y + 40 && d > c.comp - 70 && d < c.comp + 50; })) return true;
+    if (f.tirolesas.some(function(t) { return cx > t.x1 && cx < t.x2 && Math.abs(cy - (t.y1 + (t.y2 - t.y1) * (cx - t.x1) / (t.x2 - t.x1)) - 50) < 60; })) return true;
+    return false;
+  };
+  const dentroSolido = function(b) {
+    return f.solidos.some(function(s) { return b.x < s.x + s.w && b.x + b.w > s.x && b.y < s.y + s.h && b.y + b.h > s.y; });
+  };
+  // devolve a nova altura (topo da caixa) ou null se não tem como pegar
+  const ajustar = function(x, y, w, h) {
+    const cx = x + w / 2;
+    let melhor = null;
+    for (let i = 0; i < sup.length; i++) {
+      const s = sup[i];
+      if (cx < s.x - HX || cx > s.x + s.w + HX) continue;
+      if (y > s.y) continue;                                 // a superfície está acima do item
+      const minY = s.y - 72 - s.h;                           // mais alto que dá para pegar daqui (base da caixa)
+      const ny = y + h >= minY ? y : minY - h + 8;
+      if (dentroSolido({ x: x, y: ny, w: w, h: h })) continue;
+      if (melhor === null || Math.abs(ny - y) < Math.abs(melhor - y)) melhor = ny;
+    }
+    if (melhor !== null) return melhor;
+    if (especial(cx, y + h / 2) && !dentroSolido({ x: x, y: y, w: w, h: h })) return y;
+    return null;
+  };
+  f.moedas = f.moedas.filter(function(m) {
+    const ny = ajustar(m.x, m.y, 32, 32);
+    if (ny === null) return false;
+    m.y = Math.round(ny);
+    return true;
+  });
+  f.powerups = f.powerups.filter(function(u) {
+    const ny = ajustar(u.x, u.base, 44, 44);
+    if (ny === null) return false;
+    u.base = u.y = Math.round(ny);
+    return true;
+  });
 }
 
 // Arena do chefe: uma tela só, com paredes dos lados
