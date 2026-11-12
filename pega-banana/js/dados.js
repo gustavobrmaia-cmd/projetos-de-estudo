@@ -780,15 +780,15 @@ function premioDoNivel(n) {
 // =========================
 
 const PODERES = [
-  { id: "velocidade", nome: "Super Velocidade", desc: "+60% de velocidade por 10s", preco: 300,  duracao: 600, recarga: 1500 },
-  { id: "puloDuplo",  nome: "Pulo Duplo",       desc: "Pula de novo no ar por 15s", preco: 400,  duracao: 900, recarga: 1800 },
-  { id: "escudo",     nome: "Escudo",           desc: "Invencível por 8s",         preco: 500,  duracao: 480, recarga: 1800 },
-  { id: "ima",        nome: "Ímã de Moedas",    desc: "Puxa as moedas por 15s",    preco: 250,  duracao: 900, recarga: 1500 },
-  { id: "nuke",       nome: "Nuke",             desc: "Explode os inimigos perto", preco: 6000, duracao: 0,   recarga: 3600 },
-  { id: "congelar",   nome: "Congelar",         desc: "Congela os inimigos por 6s", preco: 1100, duracao: 360, recarga: 2400 },
-  { id: "superPulo",  nome: "Super Pulo",       desc: "Pulos bem mais altos por 12s", preco: 900, duracao: 720, recarga: 2100 },
-  { id: "cura",       nome: "Cura Total",       desc: "Enche todos os corações",    preco: 1750, duracao: 0,   recarga: 3600 },
-  { id: "invisivel",  nome: "Invisibilidade",   desc: "Os inimigos te ignoram por 10s (encostar ainda machuca)", preco: 1000, duracao: 600, recarga: 2400 }
+  { id: "velocidade", nome: "Super Velocidade", desc: "+60% de velocidade por 10s", preco: 120,  duracao: 600, recarga: 1500 },
+  { id: "puloDuplo",  nome: "Pulo Duplo",       desc: "Pula de novo no ar por 15s", preco: 150,  duracao: 900, recarga: 1800 },
+  { id: "escudo",     nome: "Escudo",           desc: "Invencível por 8s",         preco: 200,  duracao: 480, recarga: 1800 },
+  { id: "ima",        nome: "Ímã de Moedas",    desc: "Puxa as moedas por 15s",    preco: 100,  duracao: 900, recarga: 1500 },
+  { id: "nuke",       nome: "Nuke",             desc: "Explode os inimigos perto", preco: 600, duracao: 0,   recarga: 3600 },
+  { id: "congelar",   nome: "Congelar",         desc: "Congela os inimigos por 6s", preco: 250, duracao: 360, recarga: 2400 },
+  { id: "superPulo",  nome: "Super Pulo",       desc: "Pulos bem mais altos por 12s", preco: 200, duracao: 720, recarga: 2100 },
+  { id: "cura",       nome: "Cura Total",       desc: "Enche todos os corações",    preco: 300, duracao: 0,   recarga: 3600 },
+  { id: "invisivel",  nome: "Invisibilidade",   desc: "Os inimigos te ignoram por 10s (encostar ainda machuca)", preco: 250, duracao: 600, recarga: 2400 }
 ];
 
 // Power-ups que só aparecem nas fases (não estão na loja)
@@ -799,11 +799,11 @@ const PODERES_RAROS = [
 const DURACAO_POWERUP = 0.5;   // power-up achado na fase dura metade do comprado
 
 const MELHORIAS = [
-  { id: "dash",      nome: "Dash",             desc: "Dispara pra frente e atravessa inimigos", preco: 600 },
-  { id: "coracao1",  nome: "Coração Extra",    desc: "+1 coração de vida",                preco: 400 },
-  { id: "coracao2",  nome: "Coração Extra II", desc: "+1 coração de vida",                preco: 2500, requer: "coracao1" },
-  { id: "cipoLongo", nome: "Cipó Longo",       desc: "O laço de cipó alcança mais longe", preco: 450 },
-  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 5000 }
+  { id: "dash",      nome: "Dash",             desc: "Dispara pra frente e atravessa inimigos", preco: 800 },
+  { id: "coracao1",  nome: "Coração Extra",    desc: "+1 coração de vida",                preco: 600 },
+  { id: "coracao2",  nome: "Coração Extra II", desc: "+1 coração de vida",                preco: 1500, requer: "coracao1" },
+  { id: "cipoLongo", nome: "Cipó Longo",       desc: "O laço de cipó alcança mais longe", preco: 500 },
+  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 3000 }
 ];
 
 const ABAS = [
