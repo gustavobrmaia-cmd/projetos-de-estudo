@@ -251,20 +251,24 @@ const jogoEl = document.getElementById("jogo");
 // Em pé (tela bem mais alta que larga): o jogo ocupa a largura toda no topo e o canvas cresce
 // para baixo, onde fica o painel com os controles grandes (toque.js).
 function ajustarTela() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  // tamanho visível de verdade (no celular a barra do navegador muda a altura)
+  const vv = window.visualViewport;
+  const w = Math.round(vv ? vv.width : window.innerWidth) || window.innerWidth;
+  const h = Math.round(vv ? vv.height : window.innerHeight) || window.innerHeight;
   const retrato = h > w * 1.15;
   const escala = retrato ? w / LARGURA : Math.min(w / LARGURA, h / ALTURA);
   const alt = retrato ? Math.max(ALTURA, Math.floor(h / escala)) : ALTURA;
   modoRetrato = retrato;
   alturaTela = alt;
   // amplia as fases só se sobrar espaço para os controles embaixo (celular; tablet em pé não)
-  zoomRetrato = retrato && alt - ALTURA * 1.5 >= 1100 ? 1.5 : 1;
+  // em pé: amplia o cenário se ainda sobra espaço embaixo para os controles de toque
+  zoomRetrato = retrato ? (alt - ALTURA * 1.5 >= 760 ? 1.5 : alt - ALTURA * 1.3 >= 700 ? 1.3 : 1) : 1;
   if (canvas.height !== alt) {
     canvas.height = alt;                 // mudar o tamanho zera o contexto
     ctx.imageSmoothingEnabled = false;
   }
   jogoEl.style.height = alt + "px";
+  jogoEl.style.setProperty("--altTela", alt + "px");
   jogoEl.style.top = retrato ? "0px" : "50%";
   jogoEl.style.transformOrigin = retrato ? "50% 0" : "50% 50%";
   jogoEl.style.transform = retrato ? "translate(-50%, 0) scale(" + escala + ")" : "translate(-50%, -50%) scale(" + escala + ")";
@@ -273,6 +277,7 @@ function ajustarTela() {
 }
 
 window.addEventListener("resize", ajustarTela);
+if (window.visualViewport) window.visualViewport.addEventListener("resize", ajustarTela);
 window.addEventListener("orientationchange", function() { setTimeout(ajustarTela, 150); });
 ajustarTela();
 

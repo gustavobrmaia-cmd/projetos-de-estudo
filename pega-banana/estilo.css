@@ -55,7 +55,7 @@ html, body {
 
 /* O jogo tem 1200x700 "pixels de jogo" e é escalado para caber na janela */
 #jogo {
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
   width: 1200px;
@@ -1016,14 +1016,14 @@ body.retrato #loja .painel {
   zoom: 1.9;
   width: 600px;
   height: auto;
-  max-height: 1250px;
+  max-height: calc((var(--altTela, 2000px) - 80px) / 1.9);   /* cabe na tela (com o título e o X) */
   grid-template-columns: 1fr;
   grid-template-rows: auto auto 1fr;
 }
 body.retrato #loja .topo { flex-wrap: wrap; gap: 10px 14px; }
 body.retrato #loja .lado { display: flex; gap: 14px; align-items: flex-start; }
 body.retrato #loja .abas { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-body.retrato #loja .itens { grid-template-columns: repeat(3, 1fr); max-height: 760px; }
+body.retrato #loja .itens { grid-template-columns: repeat(3, 1fr); max-height: none; min-height: 0; overflow-y: auto; }
 
 /* =========================================================
    TELA INICIAL NOVA, PERFIL E CONQUISTAS
