@@ -414,14 +414,6 @@ const SKINS = [
     ] } }
 ];
 
-// Prêmio do chefe secreto (não dá para comprar)
-SKINS.push({ id: "reiMacaco", nome: "Saru", especial: "rei",
-  cores: { F: "#9a5a26", D: "#2a1608", P: "#f2cfa0", B: "#f08c1a" },
-  detalhe: { y: 1, cores: { K: "#2e2018", A: "#2563c9" }, mapa: [
-    "......K..K..K.......", ".....KK.KK.KKK......", "....KKKKKKKKKKK.....", "....KKKKKKKKKKKK....",
-    "....K.KK.KK.KK.K....", "....................", "....................", "....................", "....................", "....................", "....................", "....................", "....................", "....................", "....................", "....................",
-    "......AAAAAAAA......"
-  ] } });
 
 if (IMAGEM_PERSONAGEM) {
   SKINS.unshift({ id: "original", nome: "Original", preco: 0, imagem: true });
@@ -811,9 +803,7 @@ const MELHORIAS = [
   { id: "coracao1",  nome: "Coração Extra",    desc: "+1 coração de vida",                preco: 400 },
   { id: "coracao2",  nome: "Coração Extra II", desc: "+1 coração de vida",                preco: 2500, requer: "coracao1" },
   { id: "cipoLongo", nome: "Cipó Longo",       desc: "O laço de cipó alcança mais longe", preco: 450 },
-  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 5000 },
-  // prêmio do chefe secreto (não dá para comprar)
-  { id: "nuvem",     nome: "Nuvem Mágica",     desc: "Uma vez por fase, se cair num buraco, a nuvem te salva sem perder vida", preco: 0, especial: "rei" }
+  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 5000 }
 ];
 
 const ABAS = [

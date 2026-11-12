@@ -86,12 +86,6 @@ function darPremioDaFase(i) {
 function mostrarCartaoFase() {
   if (fase.tutorial) { cartao = null; return; }
   const m = MUNDOS[fase.mundo];
-  if (fase.secreta) {
-    const linhas = [tr("O macaco lendário! Tentativas restantes: {0}", save.rei.tentativas)];
-    if (nivelSaru()) linhas.push(tr("Nível {0}: mais vida, mais rápido e furioso mais cedo", nivelSaru() + 1));
-    cartao = { t: 0, titulo: nomeSaru(false), mundo: 0, chefe: "reiMacaco", linhas: linhas };
-    return;
-  }
   if (fase.ehChefe) {
     cartao = { t: 0, titulo: m.nomeChefe, mundo: fase.mundo, chefe: m.chefe,
       linhas: [tr("{0} - o chefe do mundo", m.nome)] };

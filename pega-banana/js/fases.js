@@ -759,7 +759,7 @@ function nomeTemaFase(f) {
 }
 
 function temaDaFase(f) {
-  if (f.ehChefe || f.secreta || f.tutorial || f.etapa % 2 === 0) return null;
+  if (f.ehChefe || f.tutorial || f.etapa % 2 === 0) return null;
   return TEMAS_FASE[Math.min(TEMAS_FASE.length - 1, Math.floor(f.etapa / 2))];
 }
 

@@ -129,14 +129,12 @@ function comando(teclasNomes, texto) {
 }
 
 function atualizarTelas() {
-  const sobreposta = lojaAberta || controlesAbertos || (telaReiAberta && estado === "menu");
+  const sobreposta = lojaAberta || controlesAbertos;
   mostrar(el("telaMenu"), estado === "menu" && telaAtual === "menu" && !sobreposta);
   mostrar(el("telaMapa"), estado === "menu" && telaAtual === "mapa" && !sobreposta);
   mostrar(el("telaPausa"), estado === "jogo" && pausado && !sobreposta && !reviverAberto);
   mostrar(el("telaReviver"), estado === "jogo" && reviverAberto);
   mostrar(el("telaControles"), controlesAbertos);
-  mostrar(el("telaRei"), telaReiAberta && estado === "menu" && !lojaAberta && !controlesAbertos);
-  atualizarAvisoRei();
   mostrar(el("botoesJogo"), estado === "jogo" && !pausado);
   if (typeof nomeComando === "function") {
     // nomes das teclas sempre de acordo com a aba Controles (no toque, sem tecla)
@@ -553,7 +551,7 @@ function renderizarLoja() {
         linhaTexto(card, "preco", tr("Comprado"));
         botao(card, tr("Comprado"), true, { melhoria: m.id });
       } else if (m.especial) {
-        linhaTexto(card, "preco", tr("Derrote o Saru"));
+        linhaTexto(card, "preco", "");
         botao(card, tr("Bloqueado"), true, { melhoria: m.id });
       } else {
         precoHtml(card, m.preco);
@@ -582,7 +580,6 @@ function renderizarLoja() {
       const travado = item.nivel !== undefined && save.nivel < item.nivel;   // nível libera a compra
       const premio = item.fase !== undefined || travado || !!item.especial;
       if (tem) linhaTexto(card, "preco", equipado ? tr("Equipado") : tr("Seu"));
-      else if (item.especial) linhaTexto(card, "preco", tr("Derrote o Saru"));
       else if (item.fase !== undefined) linhaTexto(card, "preco", tr("Passe a fase {0}", nomeFase(item.fase)));
       else if (travado) linhaTexto(card, "preco", tr("Chegue ao nível {0}", item.nivel));
       else precoHtml(card, item.preco);
@@ -692,10 +689,6 @@ document.querySelectorAll("[data-acao]").forEach(function(b) {
     else if (acao === "padraoControles") { save.teclas = copiaTeclasPadrao(); reconstruirMapaTeclas(); salvar(); renderizarControles(); atualizarTelas(); }
     else if (acao === "continuar") pausar(false);
     else if (acao === "pausar") pausar(true);
-    else if (acao === "reiniciar" && fase && fase.secreta && save.rei.tentativas <= 0) {
-      voltarAoMenu();
-      abrirTelaRei();
-    }
     else if (acao === "reiniciar") {
       pausado = false;
       atualizarTelas();

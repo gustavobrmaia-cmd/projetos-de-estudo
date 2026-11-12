@@ -52,11 +52,10 @@ function medir(categoria, oque, acao) {
   } catch (e) { /* estatística nunca pode travar o jogo */ }
 }
 
-// "tutorial", "saru" ou "1-1" ... "4-6" (mundo-etapa; a 6ª de cada mundo é o chefe)
+// "tutorial" ou "1-1" ... "4-6" (mundo-etapa; a 6ª de cada mundo é o chefe)
 function nomeNivel() {
   if (!fase) return "?";
   if (fase.tutorial) return "tutorial";
-  if (fase.secreta) return "saru";
   return (fase.mundo + 1) + "-" + (fase.etapa + 1);
 }
 
@@ -183,7 +182,7 @@ function premiadoDisponivel() {
 // ---------- Assista para reviver ----------
 
 function podeReviver() {
-  return premiadoDisponivel() && !!fase && !fase.reviveu && !fase.secreta && !fase.tutorial;
+  return premiadoDisponivel() && !!fase && !fase.reviveu && !fase.tutorial;
 }
 
 function abrirReviver() {

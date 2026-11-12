@@ -80,10 +80,6 @@ function danoChefe(dano, origemX, ignoraInvencivel) {
   c.flash = 6;
   c.invencivel = 6;
   som("pisao");
-  if (c.hp <= 0 && c.tipo === "reiMacaco") {
-    reiTransformar(c);   // 1ª barra do chefe secreto: vira o Saru Gigante
-    return;
-  }
   if (c.hp <= 0) {
     c.hp = 0;
     c.vivo = false;
@@ -166,9 +162,7 @@ function atualizarChefe() {
         c.foiPro = true;
         particula({ tipo: "estrela", x: limitar(c.x + c.w / 2, 40, LARGURA - 40), y: 26, vx: 0, vy: 0, g: 0, vida: 70, max: 70 });
         som("estrela");
-        if (fase.secreta) {
-          reiVencido();
-        } else {
+        {
           const primeira = !save.chefes[fase.mundo];
           const premio = primeira ? RECOMPENSA_CHEFE[fase.mundo] : 60;
           ganharMoedas(premio, LARGURA / 2, 200);
@@ -998,7 +992,6 @@ function desenharBananaDragao(dir, fr, w, comBanana) {
 function desenharChefe() {
   const c = chefe;
   const spr = SPR_CHEFE[c.tipo];
-  // (o Saru decide sozinho quando fica furioso: em níveis altos, mais cedo)
   const raiva = (c.raiva !== undefined ? c.raiva : c.hp <= c.hpMax / 2) && c.vivo;
 
   // Quadro atual (o "dano" aparece nos últimos tiques do piscar)

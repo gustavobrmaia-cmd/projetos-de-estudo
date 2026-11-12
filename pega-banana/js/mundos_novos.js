@@ -15,7 +15,7 @@
 const AR_MAX = 600;              // 10 s parado (andando o ar dura o dobro)
 
 function noMar() {
-  return !!fase && fase.id === "oceano" && !fase.secreta && !fase.tutorial;
+  return !!fase && fase.id === "oceano" && !fase.tutorial;
 }
 
 function gravidade() { return noMar() ? 0.36 : GRAV; }

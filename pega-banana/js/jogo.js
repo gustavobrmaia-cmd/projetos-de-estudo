@@ -88,7 +88,7 @@ function vidasMax() {
 function iniciarFase(indice, doCheckpoint) {
   if (!doCheckpoint) { checkpointX = null; danoNaTentativa = false; }
   resultadoFase = null;
-  fase = indice === FASE_REI ? gerarFaseRei() : indice === FASE_TUTORIAL ? gerarTutorial() : gerarFase(indice);
+  fase = indice === FASE_TUTORIAL ? gerarTutorial() : gerarFase(indice);
   inimigos = fase.inimigos.map(criarInimigo);
   projeteis = [];
   particulas = [];
@@ -108,7 +108,7 @@ function iniciarFase(indice, doCheckpoint) {
   const x0 = doCheckpoint && checkpointX !== null ? checkpointX : fase.inicioX;
   jogador = criarJogador(x0, CHAO - 72);
 
-  chefe = fase.ehChefe ? (fase.secreta ? criarChefeRei() : criarChefe(fase.mundo)) : null;
+  chefe = fase.ehChefe ? criarChefe(fase.mundo) : null;
   banana = criarBananaDaFase();
 
   cameraX = limitar(jogador.x - larguraVista() * 0.4, 0, Math.max(0, fase.largura - larguraVista()));
@@ -778,21 +778,6 @@ function machucar(origemX, ignorarInvencivel) {
 
 function caiuNoBuraco() {
   const j = jogador;
-  if (temMelhoria("nuvem") && !fase.nuvemUsada && !j.morto) {
-    fase.nuvemUsada = true;
-    cancelarLaco();
-    j.cipo = null;
-    if (j.deslizando) { j.deslizando = false; j.h = 72; }
-    voltarProSeguro(j);
-    j.vy = -6;
-    j.invencivel = 60;
-    som("poder");
-    texto(j.x + j.w / 2, j.y - 20, tr("Nuvem Mágica!"), "#e7f5ff", 24);
-    for (let i = 0; i < 14; i++) {
-      particula({ tipo: "q", x: j.x + j.w / 2 + (Math.random() - 0.5) * 70, y: j.y + j.h, vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 1.5, g: 0, vida: 40, max: 40, cor: i % 2 ? "#ffffff" : "#d0def0", tam: 12 });
-    }
-    return;
-  }
   j.tirolesa = null;
   j.vidas--;
   perdeuVida();
@@ -830,8 +815,7 @@ function morrer() {
 function perdeuTudo() {
   sujo = true;
   save.stats.mortes++;
-  if (fase.secreta) reiPerdeu();          // Saru: gasta a tentativa
-  else if (podeReviver()) abrirReviver();   // Poki: "assista um anúncio para reviver"
+  if (podeReviver()) abrirReviver();   // Poki: "assista um anúncio para reviver"
   else voltarDoCheckpoint();
 }
 
@@ -1424,14 +1408,13 @@ function atualizarMoedas() {
 // O vento leva a banana na frente do macaco a fase inteira: às vezes ela chega pertinho, às vezes
 // dispara para longe (e se o macaco chegar perto demais, uma rajada leva ela). Na reta final ela
 // escapa de vez e o macaco sai correndo da tela atrás dela -> próxima fase.
-// Nos chefes (menos o Dragão, que já entra com ela nas garras, e o Saru): a banana chega voando,
+// Nos chefes (menos o Dragão, que já entra com ela nas garras): a banana chega voando,
 // o chefe pega no ar e segura a luta inteira; derrotado, ele solta, ela foge e o macaco vai atrás.
 // =========================
 
 const BANANA_ALTURA = CHAO - 185;   // um pouco abaixo do meio da tela (y ~ 435)
 
 function criarBananaDaFase() {
-  if (fase.secreta) return null;
   if (fase.tutorial) return { x: fase.fimX, y: CHAO - 44, base: CHAO - 44, estado: "parada", t: 0, rot: 0, vy: 0 };
   if (fase.ehChefe) {
     if (fase.id === "lava") return null;   // o Dragão já está com ela
@@ -1611,7 +1594,7 @@ function iniciarSaida() {
 function correrSaindo(j) {
   j.dir = 1;
   // Oceano: a onda de bolhas leva o macaco junto com a banana, os dois rodopiando
-  if (fase.id === "oceano" && !fase.ehChefe && !fase.secreta) {
+  if (fase.id === "oceano" && !fase.ehChefe) {
     j.tSaida = (j.tSaida || 0) + 1;
     j.vx = 4 + Math.min(8, j.tSaida * 0.15);
     j.x += j.vx;
@@ -4115,7 +4098,6 @@ function desenharJogo() {
   if (zoom !== 1) ctx.scale(zoom, zoom);
 
   desenharFundo(fase.mundo, cam);
-  desenharLuaRei();
 
   ctx.save();
   ctx.translate(-cam + tx, ty);
@@ -4139,7 +4121,7 @@ function desenharJogo() {
   desenharAvisos();
   desenharPlantas(cam);
   desenharInimigos(cam);
-  if (chefe) { if (chefeVisivel()) { desenharChefe(); desenharBanana(true); } desenharExtrasRei(); }
+  if (chefe) { desenharChefe(); desenharBanana(true); }
   desenharAura();
   desenharPetJogo();
   desenharJogador();
@@ -4163,7 +4145,6 @@ function desenharJogo() {
     ctx.fillRect(0, 0, LARGURA, ALTURA);
   }
 
-  desenharNoiteRei();
   ctx.restore();
 
   // cena depois do chefe: faixas pretas de cinema e o susto do macaco

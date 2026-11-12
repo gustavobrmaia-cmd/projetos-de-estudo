@@ -6,7 +6,7 @@
 // Sem buracos, sem anúncio e sem cronômetro. No fim vai para o menu.
 // =========================
 
-const FASE_TUTORIAL = 101;   // índice especial (as fases normais vão de 0 a 23, o Saru é 100)
+const FASE_TUTORIAL = 101;   // índice especial (fora das fases normais)
 
 const TUTO_ANDAR = 620;      // passou daqui: já sabe andar
 const TUTO_BLOCO = 820;      // bloco para pular

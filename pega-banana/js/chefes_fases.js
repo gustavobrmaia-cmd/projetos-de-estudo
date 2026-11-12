@@ -12,7 +12,6 @@
 //     Tubarão Abissal:  Redemoinho (puxa o macaco para o meio; o olho do redemoinho machuca)
 //     Condor dos Andes: Leque de penas (penas afiadas em leque, com aviso)
 //     Dragão de Magma:  Rio de fogo (uma onda de fogo corre pelo chão: suba nas plataformas)
-// Não mexe no Saru (chefe secreto).
 // =========================
 
 const HP_CHEFE_NOVO = { gorila: 48, escorpiaoRei: 66, yeti: 84, tubarao: 96, condor: 106, dragao: 120 };

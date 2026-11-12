@@ -971,21 +971,15 @@ button.anuncio {
 
 
 /* ===== Rei Macaco: aviso discreto no menu e tela depois de perder ===== */
-#avisoRei { min-height: 22px; font-size: 15px; color: #e8cf9a; text-shadow: 2px 2px 0 black; margin-top: -6px; }
-#avisoRei .botaoRei {
   font-size: 16px;
   padding: 6px 14px;
   --topo: #ffe8a3; --meio: #ffb52e; --base: #e8590c; --prof: #8f2d00;
   animation: pulsoRei 1.6s ease-in-out infinite;
 }
-#avisoRei .botaoRei.anuncio { --topo: #d3f9d8; --meio: #69db7c; --base: #37b24d; --prof: #1f7a34; }
 @keyframes pulsoRei {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.18) drop-shadow(0 0 6px rgba(255, 190, 60, 0.8)); }
 }
-#telaRei { background: radial-gradient(ellipse at 50% 46%, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.7) 60%, rgba(12, 5, 0, 0.9) 100%); }
-#telaRei .botoes { gap: 16px; width: 420px; }
-#telaRei .botoes button { font-size: 20px; padding: 9px 8px; }
 
 
 /* ===== Celular em pé (body.retrato, ligado pelo ajustarTela) =====
@@ -1004,17 +998,15 @@ body.retrato #telaMenu .bananaDeco { width: 58px; height: 48px; }
 body.retrato #telaMenu .pilulas { flex-wrap: wrap; max-width: 600px; gap: 12px 14px; }
 body.retrato #telaMenu .botoes { width: 600px; }
 body.retrato #telaMenu .controles { display: none; }
-body.retrato #avisoRei { max-width: 600px; text-align: center; }
 
 /* mapa: os mundos um embaixo do outro */
 body.retrato #telaMapa > * { zoom: 1.9; }
 body.retrato #mundos { grid-template-columns: 520px; gap: 18px; }
 body.retrato .mundo .fases { grid-auto-rows: 66px; }
 
-/* painéis do meio (pausa, reviver, Saru, opções) */
+/* painéis do meio (pausa, reviver, opções) */
 body.retrato #telaPausa .painelCentral,
 body.retrato #telaReviver .painelCentral,
-body.retrato #telaRei .painelCentral { zoom: 2.1; }
 body.retrato #telaControles .painelCentral { zoom: 1.9; max-width: 600px; }
 body.retrato #listaControles { grid-template-columns: 540px; }
 body.retrato .abasOpcoes { flex-wrap: wrap; justify-content: center; }
