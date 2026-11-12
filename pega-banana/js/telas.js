@@ -147,6 +147,9 @@ function atualizarTelas() {
     el("telaPausa").querySelector('[data-acao="continuar"]').textContent = tr("Continuar") + tc("pausa");
     el("telaPausa").querySelector('[data-acao="loja"]').textContent = tr("Loja") + tc("loja");
     if (!lojaAberta) el("lojaDica").textContent = dicaLoja();
+    el("telaMenu").querySelector('[data-acao="jogar"]').textContent = toqueAtivo ? tr("Jogar") : tr("Jogar (Enter)");
+    el("telaReviver").querySelector('[data-acao="reviver"]').textContent = toqueAtivo ? tr("Assistir e reviver") : tr("Assistir e reviver (Enter)");
+    el("telaReviver").querySelector('[data-acao="naoReviver"]').textContent = toqueAtivo ? tr("Voltar do checkpoint") : tr("Voltar do checkpoint (Esc)");
   }
   mostrar(el("loja"), lojaAberta);
   el("menuNivel").textContent = save.nivel;

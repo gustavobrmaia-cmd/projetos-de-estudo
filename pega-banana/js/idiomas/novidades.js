@@ -2,6 +2,8 @@
 // Textos novos (cena do cipó, temas das fases, chefes com fases...). Chave: o texto em português.
 // O inglês vai para o EN; os outros idiomas que faltarem caem no inglês.
 Object.assign(EN, {
+  "Jogar": "Play", "Assistir e reviver": "Watch and revive", "Voltar do checkpoint": "Back to checkpoint",
+  "Assistir e reviver (Enter)": "Watch and revive (Enter)", "Voltar do checkpoint (Esc)": "Back to checkpoint (Esc)", "Toque na tela para continuar": "Tap the screen to continue",
   "Fases": "Stages", "Perfil": "Profile", "Conquistas": "Achievements", "Trocar nome": "Change name", "estrelas": "stars", "conquistas": "achievements",
   "Qual é o seu nome?": "What's your name?", "Confirmar": "Confirm", "De 3 a 20 letras.": "3 to 20 letters.",
   "O nome precisa ter pelo menos 3 letras.": "The name needs at least 3 letters.", "O nome pode ter no máximo 20 letras.": "The name can have at most 20 letters.",

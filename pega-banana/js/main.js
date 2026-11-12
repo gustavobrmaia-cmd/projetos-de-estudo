@@ -218,13 +218,25 @@ function passo() {
 }
 
 function desenharTudo() {
+  // em pé, as cenas (logo, história, mapa do mundo, praia, final) ficam no meio da tela,
+  // sem o painel de controles embaixo
+  const cenaEmPe = modoRetrato && (estado === "cena" || estado === "intro" || estado === "final");
+  if (cenaEmPe) {
+    ctx.fillStyle = "#0d0704";
+    ctx.fillRect(0, 0, LARGURA, alturaTela);
+    ctx.save();
+    ctx.translate(0, Math.round((alturaTela - ALTURA) / 2));
+  }
   if (estado === "jogo") desenharJogo();
   else if (estado === "intro") desenharIntro();
   else if (estado === "final") desenharFinal();
   else if (estado === "cena" && cenaAtual) cenaAtual.desenhar();
   else desenharMenuFundo();
+  if (cenaEmPe) ctx.restore();
   desenharTransicao();
-  desenharPainelRetrato();
+  if (!cenaEmPe) desenharPainelRetrato();
+  // em pé o painel do cipó vai por cima do painel de controles
+  if (estado === "jogo" && modoRetrato) desenharCenaCipoPainel();
   // depois do painel: em pé a faixa do tutorial fica no painel embaixo do cenário
   if (estado === "jogo" && fase && fase.tutorial && !transicao) desenharTutorial();
 }
@@ -251,6 +263,8 @@ const jogoEl = document.getElementById("jogo");
 // Em pé (tela bem mais alta que larga): o jogo ocupa a largura toda no topo e o canvas cresce
 // para baixo, onde fica o painel com os controles grandes (toque.js).
 function ajustarTela() {
+  // teclado do celular aberto (digitando o nome): a altura muda, mas o layout não deve pular
+  if (document.activeElement && document.activeElement.tagName === "INPUT" && jogoEl.style.transform) return;
   // tamanho visível de verdade (no celular a barra do navegador muda a altura)
   const vv = window.visualViewport;
   const w = Math.round(vv ? vv.width : window.innerWidth) || window.innerWidth;

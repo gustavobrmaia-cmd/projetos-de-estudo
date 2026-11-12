@@ -4155,13 +4155,16 @@ function desenharJogo() {
     jogador.surpreso--;
     balaoSinal(Math.round(jogador.x + jogador.w / 2 - cam) + 20, Math.round(jogador.y) - 40, jogador.surpreso > 35 ? "!" : "!?");
   }
+  const bj = el("botoesJogo");
+  const escondeBotoes = jogador.cinema > 0.3 ? "hidden" : "";
+  if (bj.style.visibility !== escondeBotoes) bj.style.visibility = escondeBotoes;
   if (jogador.cinema) barrasCinema(jogador.cinema);
   else {
     desenharHud();
     desenharExtrasHud();
   }
   desenharMensagem();
-  desenharCenaCipoPainel();
+  if (!modoRetrato) desenharCenaCipoPainel();
   desenharResultadoFase();
   desenharCron();
   if (!modoRetrato) desenharToque();

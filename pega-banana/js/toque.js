@@ -113,6 +113,7 @@ function ligarToque() {
   if (toqueAtivo) return;
   toqueAtivo = true;
   controleAtivo = false;
+  document.body.classList.add("toque");
   atualizarTelas();
 }
 
@@ -121,6 +122,16 @@ canvas.addEventListener("touchstart", function(e) {
   iniciarAudio();
   ligarToque();
 
+  // Cenas: um toque passa a página da história, pula o logo, o mapa do mundo e a praia
+  if (estado === "cena") {
+    if (cenaAtual) cenaAtual.pular("toque");
+    return;
+  }
+  // painel do cipó-laço (depois do Gorila): um toque em qualquer lugar continua
+  if (estado === "jogo" && jogador && jogador.cenaCipo) {
+    jogador.cenaCipoClique = true;
+    return;
+  }
   // Cenas: um toque pula a abertura ou volta do final
   if (estado === "intro") {
     if (intro.t > 30) terminarIntro();
@@ -180,6 +191,7 @@ document.addEventListener("touchstart", function() {
 document.addEventListener("keydown", function() {
   if (toqueAtivo) {
     toqueAtivo = false;
+    document.body.classList.remove("toque");
     toque.stick = null;
     toque.botoes = {};
     atualizarTelas();

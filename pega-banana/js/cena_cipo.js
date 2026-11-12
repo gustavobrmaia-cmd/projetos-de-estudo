@@ -183,6 +183,13 @@ function desenharCenaCipoPainel() {
   const k = suavizar(Math.min(1, c.t / 20));
   ctx.fillStyle = "rgba(0,0,0," + (0.45 * k).toFixed(2) + ")";
   ctx.fillRect(0, 0, LARGURA, alturaTela);
+  // em pé (celular): painel maior, no meio da parte de cima da tela
+  ctx.save();
+  if (modoRetrato) {
+    ctx.translate(LARGURA / 2, Math.min(alturaTela * 0.4, ALTURA * 0.7));
+    ctx.scale(1.4, 1.4);
+    ctx.translate(-LARGURA / 2, -ALTURA / 2);
+  }
   const W = 820, H = 470;
   const x0 = Math.round(LARGURA / 2 - W / 2), y0 = Math.round(ALTURA / 2 - H / 2 + (1 - k) * 40);
   ctx.globalAlpha = k;
@@ -276,7 +283,8 @@ function desenharCenaCipoPainel() {
   if (c.t > 50) {
     ctx.globalAlpha = k * (0.55 + Math.sin(c.t * 0.1) * 0.35);
     ctx.font = "bold 16px " + FONTE;
-    textoSombra(tr("Aperte {0} para continuar", nomeComando("pulo")), LARGURA / 2, y0 + H - 14, "#dee2e6", 2);
+    textoSombra(toqueAtivo ? tr("Toque na tela para continuar") : tr("Aperte {0} para continuar", nomeComando("pulo")), LARGURA / 2, y0 + H - 14, "#dee2e6", 2);
   }
   ctx.globalAlpha = 1;
+  ctx.restore();
 }

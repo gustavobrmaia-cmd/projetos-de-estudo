@@ -220,6 +220,7 @@ function abrirNome(depois) {
 function fecharNome() {
   nomeAberto = false;
   el("campoNome").blur();
+  setTimeout(ajustarTela, 300);   // o teclado fechou: recalcula o tamanho da tela
   atualizarTelas();
 }
 
