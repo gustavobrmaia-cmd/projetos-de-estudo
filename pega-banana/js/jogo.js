@@ -1656,7 +1656,6 @@ function fimDaFase() {
   ganharXp(XP.fase + 15 * fase.mundo);
   const premio = darPremioDaFase(i);
   let sub = tr("A banana escapou de novo! Próximo: {0}", nomeFase(i + 1));
-  if (premio) sub = tr("Você ganhou: {0}!  Próximo: {1}", premio.nome, nomeFase(i + 1));
   salvar();
   sujo = false;
   som("vitoria");
@@ -4158,7 +4157,6 @@ function desenharJogo() {
 
   desenharClima();
   ambienteMundo(fase.mundo, cam, tempo);
-  ambienteFase(fase, cam, tempo);
 
   if (flashNuke > 0) {
     ctx.fillStyle = "rgba(255,255,240," + (flashNuke / 40) * 0.8 + ")";

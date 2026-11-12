@@ -204,3 +204,16 @@
   }
 })();
 
+
+// Roupas que antes eram prêmio de fase agora ficam à venda na loja desde o começo
+// (o preço sobe um pouco conforme o mundo de onde vinham). Quem já ganhou continua com elas.
+(function() {
+  const BASE = { skin: 650, chapeu: 260, oculos: 230, roupa: 240, cachecol: 200, calca: 220, sapato: 220, pet: 420 };
+  SKINS.map(function(s) { return Object.assign(s, { _tipo: "skin" }); }).concat(ITENS).forEach(function(c) {
+    if (c.fase === undefined) return;
+    const mundo = Math.floor(c.fase / FASES_POR_MUNDO);
+    c.preco = Math.round(((BASE[c._tipo || c.tipo] || 250) + mundo * 60) / 10) * 10;
+    delete c.fase;
+  });
+  SKINS.forEach(function(s) { delete s._tipo; });
+})();

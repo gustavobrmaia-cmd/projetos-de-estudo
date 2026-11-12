@@ -2,7 +2,7 @@
 
 // =========================
 // ARTE EXTRA
-// - Bananeira da história (pixel art com folhas rasgadas, tronco em camadas e o "coração" roxo)
+// - Bananeira da história (pixel art com folhas rasgadas e tronco em camadas; só a banana dourada pendurada)
 // Carregado depois de arte_chefes2.js (usa o motor de pixelarte.js e objCanvas de arte_objetos.js).
 // =========================
 
@@ -98,16 +98,6 @@ function construirBananeira() {
 
   // engaço: o cabo do cacho saindo da copa e descendo (a banana dourada fica pendurada nele)
   pxMembro(b, cx + 2, topo + 2, cx + 10, topo + 14, 1.4, 1.2, ["#3a4a18", "#5c6b2a", "#8a9a3a", "#b5c060"], { rim: false });
-  // cachinho de bananas verdes
-  [[cx + 12, topo + 12, -0.9], [cx + 14, topo + 15, -0.6], [cx + 9, topo + 16, -1.2], [cx + 13, topo + 19, -0.7]].forEach(function(p, i) {
-    pxMembro(b, p[0], p[1], p[0] + Math.cos(p[2]) * 5, p[1] + Math.sin(p[2]) * 5, 1.5, 1.1,
-      i % 2 ? ["#4a6a14", "#74a020", "#a9d03a", "#d8f07a"] : ["#5a7a10", "#8ab020", "#c0e040", "#ecf8a0"], { rim: false });
-  });
-  // "coração" da bananeira (flor roxa pendurada)
-  pxMembro(b, cx + 12, topo + 20, cx + 15, topo + 30, 0.9, 0.9, ["#3a4a18", "#5c6b2a", "#8a9a3a", "#b5c060"], { rim: false });
-  pxElipse(b, cx + 15.5, topo + 34, 3.2, 4.6, ["#3b0a2a", "#6a1648", "#9c2a6e", "#d0569a", "#f3a6cc"], { rim: false, ang: -0.25,
-    tex: function(x, y, i) { return (y % 3 === 0) ? i - 1 : i; } });
-
   // brotos e capim no pé
   pxFolhaBananeira(b, [cx - 6, H - 2], [cx - 16, H - 16], [cx - 22, H - 22], 2.6, verde, 51, { rasgado: 0, talo: 0.2 });
   pxFolhaBananeira(b, [cx + 6, H - 2], [cx + 15, H - 14], [cx + 24, H - 18], 2.4, verde, 52, { rasgado: 0, talo: 0.2 });

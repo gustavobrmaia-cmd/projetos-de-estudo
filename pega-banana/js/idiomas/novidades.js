@@ -2,6 +2,14 @@
 // Textos novos (cena do cipó, temas das fases, chefes com fases...). Chave: o texto em português.
 // O inglês vai para o EN; os outros idiomas que faltarem caem no inglês.
 Object.assign(EN, {
+  "Era uma vez um macaquinho que adorava bananas.": "Once upon a time there was a little monkey who loved bananas.",
+  "Um dia, ele procurou a banana perfeita pela selva inteira...": "One day, he searched the whole jungle for the perfect banana...",
+  "...e achou uma banana DOURADA no alto da bananeira!": "...and found a GOLDEN banana at the top of the banana tree!",
+  "Ele pegou a banana e, bem na hora da primeira mordida...": "He grabbed the banana and, right at the first bite...",
+  "...uma ventania levou a banana embora!": "...a gust of wind blew the banana away!",
+  "A banana voou para longe, por cima das árvores.": "The banana flew far away, over the trees.",
+  "E lá foi o macaquinho atrás dela!": "And off went the little monkey after it!",
+  "Também acerta os chefes. Recarrega rapidinho.": "It also hits bosses. Recharges fast.",
   "A Subida": "The Climb",
   "Emboscada": "Ambush",
   "O Abismo": "The Abyss",
@@ -43,4 +51,48 @@ Object.assign(TRADUCOES.it = TRADUCOES.it || {}, {
   "Aperte {0} para continuar": "Premi {0} per continuare",
   "Joga o cipó: laça o inimigo, puxa e chuta ele pro espaço!": "Lancia la liana: prendi il nemico, tiralo e calcialo nello spazio!",
   "Também acerta os chefes e desmancha o cospe-areia. Recarrega rapidinho.": "Colpisce anche i boss e distrugge gli sputasabbia. Si ricarica in fretta."
+});
+
+Object.assign(TRADUCOES.es, {
+"Era uma vez um macaquinho que adorava bananas.": "Había una vez un monito que adoraba los plátanos.",
+"Um dia, ele procurou a banana perfeita pela selva inteira...": "Un día buscó el plátano perfecto por toda la selva...",
+"...e achou uma banana DOURADA no alto da bananeira!": "...¡y encontró un plátano DORADO en lo alto del platanero!",
+"Ele pegou a banana e, bem na hora da primeira mordida...": "Agarró el plátano y, justo en el primer mordisco...",
+"...uma ventania levou a banana embora!": "...¡una ráfaga de viento se llevó el plátano!",
+"A banana voou para longe, por cima das árvores.": "El plátano voló lejos, por encima de los árboles.",
+"E lá foi o macaquinho atrás dela!": "¡Y allá fue el monito tras él!",
+"Também acerta os chefes. Recarrega rapidinho.": "También golpea a los jefes. Se recarga rápido."
+});
+
+Object.assign(TRADUCOES.fr, {
+"Era uma vez um macaquinho que adorava bananas.": "Il était une fois un petit singe qui adorait les bananes.",
+"Um dia, ele procurou a banana perfeita pela selva inteira...": "Un jour, il chercha la banane parfaite dans toute la jungle...",
+"...e achou uma banana DOURADA no alto da bananeira!": "...et trouva une banane DORÉE en haut du bananier !",
+"Ele pegou a banana e, bem na hora da primeira mordida...": "Il attrapa la banane et, juste à la première bouchée...",
+"...uma ventania levou a banana embora!": "...une rafale de vent emporta la banane !",
+"A banana voou para longe, por cima das árvores.": "La banane s'envola au loin, au-dessus des arbres.",
+"E lá foi o macaquinho atrás dela!": "Et le petit singe partit à sa poursuite !",
+"Também acerta os chefes. Recarrega rapidinho.": "Elle touche aussi les boss. Recharge rapide."
+});
+
+Object.assign(TRADUCOES.de, {
+"Era uma vez um macaquinho que adorava bananas.": "Es war einmal ein kleiner Affe, der Bananen liebte.",
+"Um dia, ele procurou a banana perfeita pela selva inteira...": "Eines Tages suchte er im ganzen Dschungel die perfekte Banane...",
+"...e achou uma banana DOURADA no alto da bananeira!": "...und fand eine GOLDENE Banane oben auf der Bananenstaude!",
+"Ele pegou a banana e, bem na hora da primeira mordida...": "Er schnappte sich die Banane und, genau beim ersten Bissen...",
+"...uma ventania levou a banana embora!": "...wehte ein Windstoß die Banane davon!",
+"A banana voou para longe, por cima das árvores.": "Die Banane flog weit weg, über die Bäume.",
+"E lá foi o macaquinho atrás dela!": "Und los ging der kleine Affe hinterher!",
+"Também acerta os chefes. Recarrega rapidinho.": "Trifft auch Bosse. Lädt schnell nach."
+});
+
+Object.assign(TRADUCOES.it, {
+"Era uma vez um macaquinho que adorava bananas.": "C'era una volta una scimmietta che adorava le banane.",
+"Um dia, ele procurou a banana perfeita pela selva inteira...": "Un giorno cercò la banana perfetta in tutta la giungla...",
+"...e achou uma banana DOURADA no alto da bananeira!": "...e trovò una banana D'ORO in cima al banano!",
+"Ele pegou a banana e, bem na hora da primeira mordida...": "Prese la banana e, proprio al primo morso...",
+"...uma ventania levou a banana embora!": "...una folata di vento portò via la banana!",
+"A banana voou para longe, por cima das árvores.": "La banana volò lontano, sopra gli alberi.",
+"E lá foi o macaquinho atrás dela!": "E via la scimmietta a inseguirla!",
+"Também acerta os chefes. Recarrega rapidinho.": "Colpisce anche i boss. Si ricarica in fretta."
 });

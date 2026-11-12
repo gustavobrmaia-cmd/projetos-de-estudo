@@ -732,17 +732,16 @@ Object.assign(CHUNKS, {
 
 // Temas das fases pares do mundo (2, 4, 6, 8 e 10): cada uma tem um jeito próprio, em vez de
 // repetir a fase anterior. As ímpares (1, 3, 5, 7, 9) apresentam o inimigo e o obstáculo novos.
-// clima: muda a hora do dia / o tempo da fase (ver ambienteFase em jogo.js)
 const TEMAS_FASE = [
-  { id: "subida",    nome: "A Subida",         clima: "tarde",
+  { id: "subida",    nome: "A Subida",
     montar: function(n, o) { return ["torre", n, "degraus", "grupo", "escada", o(), "zigueZague", n, "torre"]; } },
-  { id: "emboscada", nome: "Emboscada",        clima: "noite",
+  { id: "emboscada", nome: "Emboscada",
     montar: function(n, o) { return ["arena", n, "corredor", "grupo", o(), "atirador", "arena", n, "corredor"]; } },
-  { id: "abismo",    nome: "O Abismo",         clima: "neblina",
+  { id: "abismo",    nome: "O Abismo",
     montar: function(n, o) { return ["pontesFlutuantes", n, "zigueZague", "grupo", "buraco", o(), "degraus", "pontesFlutuantes", n, "atirador"]; } },
-  { id: "tesouro",   nome: "Caça ao Tesouro",  clima: "pordosol",
+  { id: "tesouro",   nome: "Caça ao Tesouro",
     montar: function(n, o) { return ["rotaAlta", n, "bau", o(), "rotaAlta", "zigueZague", n, "bau", "torre"]; } },
-  { id: "final",     nome: "Desafio Final",    clima: "tempestade",
+  { id: "final",     nome: "Desafio Final",
     montar: function(n, o, todos, r) {
       const extras = ["arena", "pontesFlutuantes", "torre", "corredor", "degraus"];
       const lista = [];
@@ -753,6 +752,11 @@ const TEMAS_FASE = [
       return lista;
     } }
 ];
+
+function nomeTemaFase(f) {
+  const t = TEMAS_FASE.find(function(x) { return x.id === f.tema; });
+  return t ? tr(t.nome) : "";
+}
 
 function temaDaFase(f) {
   if (f.ehChefe || f.secreta || f.tutorial || f.etapa % 2 === 0) return null;
@@ -804,7 +808,6 @@ function gerarFase(indice) {
     if (tema) {
       // fase com tema: um "roteiro" próprio com os pedaços novos (não repete a fase anterior)
       f.tema = tema.id;
-      f.clima = tema.clima;
       lista = tema.montar(novoObstaculo, function() { return sorteio(obstaculos, r); }, mundo.obstaculos.slice(0, nivel + 1), r);
       // nunca o mesmo pedaço duas vezes seguidas
       for (let i = 1; i < lista.length; i++) {

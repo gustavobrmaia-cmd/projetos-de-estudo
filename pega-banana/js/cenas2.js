@@ -140,13 +140,13 @@ function iniciarLogo(depois) {
 // ---------- HISTÓRIA EM PÁGINAS ----------
 
 const PAGINAS_HISTORIA = [
-  { txt: "Era uma vez, bem no meio da selva, um macaquinho muito guloso.", cena: "anda" },
-  { txt: "Todo dia ele procurava a banana perfeita... mas nenhuma era boa o bastante.", cena: "procura" },
-  { txt: "Até que, no alto da bananeira mais alta, ele viu uma banana DOURADA, brilhando!", cena: "ve" },
-  { txt: "Ele subiu, pegou a banana com todo o cuidado e abriu a boca para a primeira mordida...", cena: "pega" },
-  { txt: "...quando uma ventania fortíssima arrancou a banana da mão dele!", cena: "vento" },
-  { txt: "A banana saiu rodopiando por cima das árvores, cada vez mais longe.", cena: "longe" },
-  { txt: "O macaquinho apertou os olhos, estufou o peito e decidiu: ele ia pegar aquela banana!", cena: "decide" }
+  { txt: "Era uma vez um macaquinho que adorava bananas.", cena: "anda" },
+  { txt: "Um dia, ele procurou a banana perfeita pela selva inteira...", cena: "procura" },
+  { txt: "...e achou uma banana DOURADA no alto da bananeira!", cena: "ve" },
+  { txt: "Ele pegou a banana e, bem na hora da primeira mordida...", cena: "pega" },
+  { txt: "...uma ventania levou a banana embora!", cena: "vento" },
+  { txt: "A banana voou para longe, por cima das árvores.", cena: "longe" },
+  { txt: "E lá foi o macaquinho atrás dela!", cena: "decide" }
 ];
 
 function iniciarHistoria(depois) {
@@ -159,9 +159,8 @@ function iniciarHistoria(depois) {
         this.virando++;
         if (this.virando === 14) { this.pag++; this.tPag = 0; }
         if (this.virando >= 28) this.virando = 0;
-      } else if (this.tPag > 330) {
-        this.proxima();
       }
+      // (a página só vira quando o jogador aperta uma tecla ou clica)
       if (this.pag === 4 && this.tPag % 3 === 0 && this.tPag < 200) vento();
       atualizarParticulas();
     },

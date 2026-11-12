@@ -272,7 +272,7 @@ function desenharCenaCipoPainel() {
   ctx.textAlign = "center";
   textoSombra(tr("Joga o cipó: laça o inimigo, puxa e chuta ele pro espaço!"), LARGURA / 2, ky + 86, "#ffffff", 2);
   ctx.font = "bold 16px " + FONTE;
-  textoSombra(tr("Também acerta os chefes e desmancha o cospe-areia. Recarrega rapidinho."), LARGURA / 2, ky + 112, "#c0eb75", 2);
+  textoSombra(tr("Também acerta os chefes. Recarrega rapidinho."), LARGURA / 2, ky + 112, "#c0eb75", 2);
   if (c.t > 50) {
     ctx.globalAlpha = k * (0.55 + Math.sin(c.t * 0.1) * 0.35);
     ctx.font = "bold 16px " + FONTE;
