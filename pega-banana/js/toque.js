@@ -98,9 +98,10 @@ function poderNoPonto(q) {
   const p = { x: (q.x - geoPoderes.ox) / geoPoderes.k, y: (q.y - geoPoderes.oy) / geoPoderes.k };
   const y = ALTURA - 74;
   if (p.y < y - 6 || p.y > y + 64) return -1;
-  for (let i = 0; i < PODERES.length; i++) {
-    const x = 20 + i * 66;
-    if (p.x >= x - 4 && p.x <= x + 62) return i;
+  const vis = poderesVisiveis();
+  for (let k = 0; k < vis.length; k++) {
+    const x = 20 + k * 66;
+    if (p.x >= x - 4 && p.x <= x + 62) return vis[k];
   }
   return -1;
 }
@@ -497,16 +498,17 @@ let circulosPoderes = [];
 
 function desenharPoderesRetrato(j) {
   circulosPoderes = [];
-  const lista = PODERES.slice();
+  const idx = poderesVisiveis();
+  const lista = idx.map(function(i) { return PODERES[i]; });
   const f = geoPlaca.h / 150;
   const n = lista.length + (temMelhoria("dash") ? 1 : 0);
   const passo = Math.min(158 * f, (LARGURA - 30) / n);   // com muitos poderes os círculos encolhem para caber
   const r = Math.min(62 * f, passo * 0.4);
   const x0 = LARGURA / 2 - (n - 1) * passo / 2;
   const y = geoPoderes.cy;
-  lista.forEach(function(p, i) {
-    const x = x0 + i * passo;
-    circulosPoderes.push({ x: x, y: y, r: r, i: i });
+  lista.forEach(function(p, k) {
+    const x = x0 + k * passo;
+    circulosPoderes.push({ x: x, y: y, r: r, i: idx[k] });
     const qtd = save.poderes[p.id];
     const ativo = buffs[p.id] > 0;
     ctx.beginPath();

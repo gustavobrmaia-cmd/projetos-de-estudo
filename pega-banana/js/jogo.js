@@ -3836,9 +3836,20 @@ function desenharIconeCipo(x, y, r) {
 }
 
 // Quadradinhos dos poderes e do dash (canto de baixo do HUD; o modo em pé desenha ampliado no painel)
-function desenharPoderesHud(j) {
+// Só aparecem os poderes que o macaco tem (comprados) ou que estão ativos (pegos na fase)
+function poderesVisiveis() {
+  const lista = [];
   PODERES.forEach(function(p, i) {
-    const x = 20 + i * 66;
+    if (save.poderes[p.id] > 0 || buffs[p.id] > 0) lista.push(i);
+  });
+  return lista;
+}
+
+function desenharPoderesHud(j) {
+  const vis = poderesVisiveis();
+  vis.forEach(function(i, k) {
+    const p = PODERES[i];
+    const x = 20 + k * 66;
     const y = ALTURA - 74;
     const n = save.poderes[p.id];
     const ativo = buffs[p.id] > 0;
@@ -3879,7 +3890,7 @@ function desenharPoderesHud(j) {
   });
 
   if (temMelhoria("dash")) {
-    const x = 20 + PODERES.length * 66 + 10;
+    const x = 20 + vis.length * 66 + (vis.length ? 10 : 0);
     const y = ALTURA - 74;
     slotPixel(x, y, j.dash > 0);
     desenharContorno(ICONES.dash, 0, 0, 32, 32, x + 13, y + 12, 32, 32, "#0d0704", 2);

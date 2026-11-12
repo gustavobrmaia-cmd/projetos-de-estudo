@@ -142,8 +142,9 @@ function atualizarTelas() {
   if (typeof nomeComando === "function") {
     // nomes das teclas sempre de acordo com a aba Controles (no toque, sem tecla)
     const tc = function(acao) { return toqueAtivo ? "" : " (" + nomeComando(acao) + ")"; };
-    el("botoesJogo").querySelector('[data-acao="pausar"]').textContent = tr("PAUSA") + tc("pausa");
-    el("botoesJogo").querySelector('[data-acao="loja"]').textContent = tr("LOJA") + tc("loja");
+    // botões com ícone: a tecla aparece pequenininha no canto (no toque, nada)
+    el("botoesJogo").querySelector('[data-acao="pausar"] .teclaCanto').textContent = toqueAtivo ? "" : nomeComando("pausa");
+    el("botoesJogo").querySelector('[data-acao="loja"] .teclaCanto').textContent = toqueAtivo ? "" : nomeComando("loja");
     el("telaPausa").querySelector('[data-acao="continuar"]').textContent = tr("Continuar") + tc("pausa");
     el("telaPausa").querySelector('[data-acao="loja"]').textContent = tr("Loja") + tc("loja");
     if (!lojaAberta) el("lojaDica").textContent = dicaLoja();

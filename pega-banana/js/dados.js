@@ -803,7 +803,7 @@ const MELHORIAS = [
   { id: "coracao1",  nome: "Coração Extra",    desc: "+1 coração de vida",                preco: 600 },
   { id: "coracao2",  nome: "Coração Extra II", desc: "+1 coração de vida",                preco: 1500, requer: "coracao1" },
   { id: "cipoLongo", nome: "Cipó Longo",       desc: "O laço de cipó alcança mais longe", preco: 500 },
-  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 3000 }
+  { id: "puloDuploP", nome: "Pulo Duplo Eterno", desc: "Sempre pode pular mais uma vez no ar", preco: 1500 }
 ];
 
 const ABAS = [

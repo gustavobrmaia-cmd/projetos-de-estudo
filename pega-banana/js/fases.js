@@ -686,20 +686,6 @@ Object.assign(CHUNKS, {
     return x + w;
   },
 
-  // Corredor de teto baixo: dá só para pulinhos (espinhos e inimigos lá dentro)
-  corredor: function(f, x, d, r) {
-    const w = 860;
-    fChao(f, x, w, f.id === "gelo");
-    fBloco(f, x + 180, CHAO - 176, w - 360, 40);
-    fBloco(f, x + 180, CHAO - 176 - 300, 40, 300);        // parede segurando o teto (não dá pra passar por cima)
-    f.espinhos.push({ x: x + 330, y: CHAO - 24, w: 64, h: 24 });
-    if (d > 0.45) f.espinhos.push({ x: x + 560, y: CHAO - 24, w: 64, h: 24 });
-    fLinhaMoedas(f, x + 220, CHAO - 50, 3, 34);
-    fLinhaMoedas(f, x + 420, CHAO - 50, 3, 34);
-    if (d > 0.2) fColocar(f, inimigoDe(f, r, "terrestre"), x + 470);
-    return x + w;
-  },
-
   // Rota alta: no chão, inimigos e espinhos; lá em cima, um caminho de plataformas com muitas moedas
   rotaAlta: function(f, x, d, r) {
     const w = 1160;
@@ -736,14 +722,14 @@ const TEMAS_FASE = [
   { id: "subida",    nome: "A Subida",
     montar: function(n, o) { return ["torre", n, "degraus", "grupo", "escada", o(), "zigueZague", n, "torre"]; } },
   { id: "emboscada", nome: "Emboscada",
-    montar: function(n, o) { return ["arena", n, "corredor", "grupo", o(), "atirador", "arena", n, "corredor"]; } },
+    montar: function(n, o) { return ["arena", n, "muro", "grupo", o(), "atirador", "arena", n, "plataformas"]; } },
   { id: "abismo",    nome: "O Abismo",
     montar: function(n, o) { return ["pontesFlutuantes", n, "zigueZague", "grupo", "buraco", o(), "degraus", "pontesFlutuantes", n, "atirador"]; } },
   { id: "tesouro",   nome: "Caça ao Tesouro",
     montar: function(n, o) { return ["rotaAlta", n, "bau", o(), "rotaAlta", "zigueZague", n, "bau", "torre"]; } },
   { id: "final",     nome: "Desafio Final",
     montar: function(n, o, todos, r) {
-      const extras = ["arena", "pontesFlutuantes", "torre", "corredor", "degraus"];
+      const extras = ["arena", "pontesFlutuantes", "torre", "zigueZague", "degraus"];
       const lista = [];
       const obs = todos.slice().sort(function() { return r() - 0.5; });
       for (let i = 0; i < obs.length; i++) { lista.push(obs[i]); lista.push(extras[i % extras.length]); }

@@ -15,15 +15,23 @@ let depoisDoNome = null;
 
 // ---------- Ícones dos botões (grade 12x12, ampliada 4x) ----------
 const ICONES_MENU = {
+  // símbolo de perfil: cabeça e ombros
+  perfil: { cores: { K: "#2a1608", W: "#fff3d6", w: "#e0c9a0", L: "#ffffff" }, mapa: [
+    "....KKKK....", "...KWLWWK...", "..KWLWWWwK..", "..KWWWWWwK..", "..KWWWWWwK..", "...KWWWwK...",
+    "....KKKK....", "..KKKKKKKK..", ".KWLWWWWWwK.", "KWLWWWWWWWwK", "KWWWWWWWWWwK", "KKKKKKKKKKKK"] },
   engrenagem: { cores: { G: "#ced4da", g: "#5f6873", L: "#ffffff", K: "#2a1608" }, mapa: [
     "....gGGg....", ".gg.gLLg.gg.", ".gLGGLLGGLg.", "..GGGGGGGGg.", "gGGGg..gGGGg", "gLLg....gGGg",
     "gLGg....gGGg", "gGGGg..gGGGg", "..GGGGGGGGg.", ".gGGgGGgGGg.", ".gg.gGGg.gg.", "....gggg...."] },
   mapa: { cores: { K: "#2a1608", P: "#f3e3c0", p: "#d4c08a", G: "#40c057", B: "#4dabf7", R: "#e03131", r: "#8a5a2b" }, mapa: [
     "KKKKKKKKKKKK", "KPPPPPPPPpPK", "KPGGPPPPPPPK", "KPGGGPPRPRPK", "KPPGPPPPRPPK", "KPPPPrPRPRPK",
     "KPPPrPPPPPPK", "KPPrPPPPBBPK", "KPrPPPPBBBpK", "KPPPPPPPBBPK", "KpPPPPPPPPpK", "KKKKKKKKKKKK"] },
-  loja: { cores: { K: "#2a1608", B: "#b9803f", b: "#8a5a2b", L: "#d9a566", Y: "#ffd43b", y: "#c98a00", W: "#fff3bf" }, mapa: [
-    "....KKKK....", "...K....K...", "...K....K...", ".KKKKKKKKKK.", ".KLLLLLLLLK.", "KBBBBYYBBBBK",
-    "KBBBYWYyBBBK", "KBBBYYyyBBBK", "KBBBByyBBBBK", "KbBBBBBBBBbK", "KbbbbbbbbbbK", "KKKKKKKKKKKK"] },
+  pausa: { cores: { K: "#2a1608", W: "#fff3d6", w: "#e0c9a0", L: "#ffffff" }, mapa: [
+    "............", "..KKKK.KKKK.", "..KLWK.KLWK.", "..KWWK.KWWK.", "..KWWK.KWWK.", "..KWWK.KWWK.",
+    "..KWWK.KWWK.", "..KWWK.KWWK.", "..KWWK.KWWK.", "..KWwK.KWwK.", "..KKKK.KKKK.", "............"] },
+  // lojinha: toldo listrado, vitrine e porta
+  loja: { cores: { K: "#2a1608", R: "#e03131", W: "#ffffff", B: "#e9c48a", b: "#c99a5a", C: "#74c0fc", L: "#e7f5ff", D: "#8a5a2b", Y: "#ffd43b" }, mapa: [
+    "KKKKKKKKKKKK", "KRRWWRRWWRRK", "KRRWWRRWWRRK", ".KRKWKRKWKK.", ".KBBBBBBBBK.", ".KBKKKBKKbK.",
+    ".KKCLKBDDKK.", ".KKCCKBDDKK.", ".KKKKKBDYKK.", ".KBBBBBDDbK.", ".KbbbbbDDbK.", "KKKKKKKKKKKK"] },
   medalha: { cores: { K: "#2a1608", R: "#e03131", B: "#1c7ed6", Y: "#ffd43b", y: "#c98a00", L: "#fff3bf" }, mapa: [
     "..RRK..KBB..", "..RRRKKBBB..", "...RRKKBB...", "....RKKB....", "....KKKK....", "...KYYYYK...",
     "..KYYLYYyK..", "..KYLYYYyK..", "..KYYYYYyK..", "..KyYYYyyK..", "...KyyyyK...", "....KKKK...."] }
@@ -32,12 +40,6 @@ const ICONES_MENU = {
 function iconeMenu(nome) {
   const c = criarCanvas(48, 48);
   const g = c.getContext("2d");
-  if (nome === "perfil") {
-    // o rosto do próprio macaco (com a skin e o chapéu que estiver usando)
-    const spr = SPRITES_PRIMATA.parado && SPRITES_PRIMATA.parado.d;
-    if (spr) { g.imageSmoothingEnabled = false; g.drawImage(spr, 4, 0, 88, 60, 0, 0, 48, 33); g.drawImage(spr, 28, 56, 40, 24, 12, 33, 24, 15); }
-    return c;
-  }
   const ic = ICONES_MENU[nome];
   pintarMapa(g, ic.mapa, ic.cores, 4, 0, 0);
   return c;

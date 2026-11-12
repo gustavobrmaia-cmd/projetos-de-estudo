@@ -102,7 +102,9 @@ function controleNaFase(b, apertou, esq, dir, baixo) {
   if (apertou(PAD.Y)) apertos.add("laco");
   if (apertou(PAD.B) || apertou(PAD.RB)) apertos.add("dash");
   if (apertou(PAD.LT)) {
-    poderSelecionado = (poderSelecionado + 1) % PODERES.length;
+    // passa só pelos poderes que aparecem (os que tem ou estão ativos)
+    const vis = poderesVisiveis();
+    if (vis.length) poderSelecionado = vis[(vis.indexOf(poderSelecionado) + 1) % vis.length];
     som("recarga");
   }
   if (apertou(PAD.RT)) usarPoder(PODERES[poderSelecionado].id);
